@@ -27,11 +27,15 @@ from pydantic import BaseModel, Field
 from .orchestration.graph import run as run_graph
 from .orchestration.graph import run_streaming
 
-# Load .env from repo root (apps/api/src/regrag_api/server.py → ../../../../.env)
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_ENV_PATH = _REPO_ROOT / ".env"
-if _ENV_PATH.exists():
-    load_dotenv(_ENV_PATH, override=True)
+# Local-dev convenience: load .env from the repo root if present. In production
+# (Railway, Vercel, etc.) env vars come from the platform; this no-ops there.
+try:
+    _REPO_ROOT = Path(__file__).resolve().parents[4]
+    _ENV_PATH = _REPO_ROOT / ".env"
+    if _ENV_PATH.exists():
+        load_dotenv(_ENV_PATH, override=True)
+except (IndexError, OSError):
+    pass
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)-7s %(name)s: %(message)s")
 log = logging.getLogger(__name__)
