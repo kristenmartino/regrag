@@ -1,0 +1,210 @@
+# RegRAG eval set — 28 hand-crafted questions for measuring retrieval recall,
+# citation faithfulness, and refusal accuracy.
+#
+# Schema per question:
+#   id: short slug
+#   persona: which user type from case study §2 the question models
+#   expected_behavior: 'answer' | 'refuse' | 'clarify'
+#   query: what the user asks
+#   For answer-expected:
+#     expected_documents: list of accession_numbers that should appear in retrieved chunks
+#     expected_passages_keywords: 2-5 lowercased phrases that should appear in retrieved chunks
+#                                 (used for retrieval-recall scoring)
+#   For refuse-expected:
+#     expected_refusal_reason: free-text gloss of why this is OOS (not used in scoring,
+#                              just for human review of false-positive answers)
+#
+# Distribution: 5 in-scope + 2 OOS per persona × 4 personas = 28 total.
+
+questions:
+  # ─────────── Compliance analyst (operational, mostly single-doc) ───────────
+  - id: compliance-001
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "What reporting and data requirements does Order 2222 establish for distributed energy resource aggregators?"
+    expected_documents: ["20200917-3084"]
+    expected_passages_keywords: ["settlement data", "performance data", "auditing"]
+
+  - id: compliance-002
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "What is the deadline for RTO/ISO compliance filings under Order 841?"
+    expected_documents: ["20180228-3066"]
+    expected_passages_keywords: ["compliance filing", "tariff", "270 days"]
+
+  - id: compliance-003
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "Under Order 2222, how must RTOs/ISOs treat aggregations that include customers of small utilities?"
+    expected_documents: ["20200917-3084", "20210318-3057"]
+    expected_passages_keywords: ["small utility", "opt-in", "4 million MWh"]
+
+  - id: compliance-004
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "What information must distribution utilities share with DER aggregators under Order 2222-A?"
+    expected_documents: ["20210318-3057"]
+    expected_passages_keywords: ["distribution utility", "review process", "aggregator"]
+
+  - id: compliance-005
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "What metering and telemetry requirements does Order 841 impose on electric storage resources?"
+    expected_documents: ["20180228-3066"]
+    expected_passages_keywords: ["metering", "telemetry", "storage"]
+
+  - id: compliance-oos-001
+    persona: compliance_analyst
+    expected_behavior: refuse
+    query: "What are FERC's residential rooftop solar net-metering requirements?"
+    expected_refusal_reason: "Net-metering is state jurisdiction; corpus does not address it."
+
+  - id: compliance-oos-002
+    persona: compliance_analyst
+    expected_behavior: refuse
+    query: "What cybersecurity standards must investor-owned utilities follow under FERC?"
+    expected_refusal_reason: "Cybersecurity standards (NERC CIP) are out of corpus scope."
+
+  # ─────────── Counsel at energy developer (interpretive, multi-doc) ───────────
+  - id: counsel-001
+    persona: counsel
+    expected_behavior: answer
+    query: "How has FERC's treatment of state opt-out provisions evolved from Order 745 through Order 2222 and Order 2222-A?"
+    expected_documents: ["20110315-3061", "20200917-3084", "20210318-3057"]
+    expected_passages_keywords: ["opt-out", "RERRA", "Order No. 719"]
+
+  - id: counsel-002
+    persona: counsel
+    expected_behavior: answer
+    query: "Compare the metering and telemetry requirements across Orders 841 and 2222."
+    expected_documents: ["20180228-3066", "20200917-3084"]
+    expected_passages_keywords: ["metering", "telemetry"]
+
+  - id: counsel-003
+    persona: counsel
+    expected_behavior: answer
+    query: "What are the key differences between the interconnection reforms in Order 845 and the DER interconnection treatment in Order 2222?"
+    expected_documents: ["20180419-3093", "20200917-3084"]
+    expected_passages_keywords: ["interconnection", "distribution", "aggregation"]
+
+  - id: counsel-004
+    persona: counsel
+    expected_behavior: answer
+    query: "How does Order 2222 distinguish between aggregations of similar versus heterogeneous DER types?"
+    expected_documents: ["20200917-3084", "20210318-3057"]
+    expected_passages_keywords: ["heterogeneous", "demand response", "aggregation"]
+
+  - id: counsel-005
+    persona: counsel
+    expected_behavior: answer
+    query: "Did the D.C. Circuit uphold Order 841, and on what grounds?"
+    expected_documents: ["20180228-3066", "20200917-3084"]
+    expected_passages_keywords: ["D.C. Circuit", "upheld", "opt-out"]
+
+  - id: counsel-oos-001
+    persona: counsel
+    expected_behavior: refuse
+    query: "How does FERC regulate natural gas pipeline construction permits?"
+    expected_refusal_reason: "Pipeline construction (Section 7 NGA) is outside the electric corpus."
+
+  - id: counsel-oos-002
+    persona: counsel
+    expected_behavior: refuse
+    query: "What is FERC's position on EV charging infrastructure deployment incentives?"
+    expected_refusal_reason: "EV charging deployment incentives are not addressed in the corpus."
+
+  # ─────────── Federal agency staff (procedural, comments, single-doc) ───────────
+  - id: fedstaff-001
+    persona: federal_staff
+    expected_behavior: answer
+    query: "Summarize the major issues that RTO commenters raised in the Order 2222 NOPR proceeding."
+    expected_documents: ["20200917-3084"]
+    expected_passages_keywords: ["NOPR", "comments", "RTO"]
+
+  - id: fedstaff-002
+    persona: federal_staff
+    expected_behavior: answer
+    query: "What concerns did state regulatory authorities raise during the Order 841 rulemaking?"
+    expected_documents: ["20180228-3066"]
+    expected_passages_keywords: ["state", "commission", "comments"]
+
+  - id: fedstaff-003
+    persona: federal_staff
+    expected_behavior: answer
+    query: "What stakeholders requested rehearing of Order 2222 and what were their main concerns?"
+    expected_documents: ["20210318-3057"]
+    expected_passages_keywords: ["rehearing", "request"]
+
+  - id: fedstaff-004
+    persona: federal_staff
+    expected_behavior: answer
+    query: "What were the principal proposals in the RM21-17 ANOPR on transmission planning?"
+    expected_documents: ["20210715-3098"]
+    expected_passages_keywords: ["transmission", "planning", "ANOPR"]
+
+  - id: fedstaff-005
+    persona: federal_staff
+    expected_behavior: answer
+    query: "Under Order 745, when must RTOs/ISOs pay LMP for demand response?"
+    expected_documents: ["20110315-3061"]
+    expected_passages_keywords: ["LMP", "demand response", "compensation"]
+
+  - id: fedstaff-oos-001
+    persona: federal_staff
+    expected_behavior: refuse
+    query: "What is FERC's annual budget appropriation for fiscal year 2025?"
+    expected_refusal_reason: "Agency budget is administrative, not in regulatory corpus."
+
+  - id: fedstaff-oos-002
+    persona: federal_staff
+    expected_behavior: refuse
+    query: "Describe the FERC Office of Enforcement's investigation procedures for tariff violations."
+    expected_refusal_reason: "Enforcement procedures are not the subject of the orders in corpus."
+
+  # ─────────── Policy researcher (comparative, multi-doc, thematic) ───────────
+  - id: researcher-001
+    persona: researcher
+    expected_behavior: answer
+    query: "Compare how Orders 745, 841, and 2222 each address the boundary between FERC and state jurisdiction."
+    expected_documents: ["20110315-3061", "20180228-3066", "20200917-3084"]
+    expected_passages_keywords: ["jurisdiction", "wholesale", "retail"]
+
+  - id: researcher-002
+    persona: researcher
+    expected_behavior: answer
+    query: "How does the DER aggregation framework in Order 2222 build upon the storage participation framework in Order 841?"
+    expected_documents: ["20180228-3066", "20200917-3084"]
+    expected_passages_keywords: ["storage", "aggregation", "participation"]
+
+  - id: researcher-003
+    persona: researcher
+    expected_behavior: answer
+    query: "Trace FERC's stance on demand response from Order 745 through Order 2222."
+    expected_documents: ["20110315-3061", "20200917-3084"]
+    expected_passages_keywords: ["demand response", "Order No. 719", "Order No. 745"]
+
+  - id: researcher-004
+    persona: researcher
+    expected_behavior: answer
+    query: "How do interconnection-process reforms in Order 845 and Order 845-A relate to each other?"
+    expected_documents: ["20180419-3093", "20190221-3057"]
+    expected_passages_keywords: ["interconnection", "rehearing", "LGIA"]
+
+  - id: researcher-005
+    persona: researcher
+    expected_behavior: answer
+    query: "What are the different participation models that Order 2222 establishes for DER aggregations?"
+    expected_documents: ["20200917-3084"]
+    expected_passages_keywords: ["participation model", "aggregation", "tariff"]
+
+  - id: researcher-oos-001
+    persona: researcher
+    expected_behavior: refuse
+    query: "How does FERC's regulatory approach compare to state PUC oversight of distribution utilities?"
+    expected_refusal_reason: "Comparative state PUC analysis is out of corpus scope."
+
+  - id: researcher-oos-002
+    persona: researcher
+    expected_behavior: refuse
+    query: "What is the impact of FERC orders on retail consumer electricity prices?"
+    expected_refusal_reason: "Retail price impact studies are not in the corpus."

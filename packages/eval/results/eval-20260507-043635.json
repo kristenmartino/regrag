@@ -1,0 +1,224 @@
+{
+  "summary": {
+    "n_questions": 3,
+    "n_errors": 0,
+    "retrieval_recall_macro": 1.0,
+    "citation_faithfulness_macro": 0.6013071895424837,
+    "refusal_accuracy": 1.0
+  },
+  "by_persona": {
+    "compliance_analyst": {
+      "n": 2,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.5555555555555556,
+      "refusal_accuracy": 1.0
+    },
+    "counsel": {
+      "n": 1,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.6470588235294118,
+      "refusal_accuracy": 1.0
+    }
+  },
+  "by_question": [
+    {
+      "id": "compliance-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.5555555555555556,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 1330,
+        "retrieve_single": 3288,
+        "synthesize": 9596,
+        "verify": 0
+      },
+      "answer_preview": "Based on the retrieved chunks, Order 2222 establishes several reporting and data requirements for distributed energy resource aggregators:\n\n**Registration and Physical Parameter Information**\nEach RTO/ISO must revise its tariff to include requirements for distributed energy resource aggregators to e...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "The chunk discusses commenters' views on data requirements but does not itself establish the requirement that RTOs/ISOs must revise tariffs to include information and data requirements for aggregators."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states that RTOs/ISOs must establish physical parameters for aggregators to submit at registration only to the extent not already represented in general registration requirements or bidding parameters."
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "The chunk does not mention a requirement for aggregators to provide a list of individual distributed energy resources that must be updated as it changes."
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "The chunk does not mention a requirement that RTOs/ISOs must identify and explain in their compliance filings what additional specific information is needed beyond a list of resources."
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "The chunk explicitly states the requirement to maintain and submit aggregate settlement data and retain performance data for individual resources for auditing purposes, and discusses the single point of contact role of the aggregator."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "Same chunk as pair 4 - supports settlement and performance data requirements, but the information sharing with distribution utilities claim is partially supported by mentioning that sharing detailed individual resource information may be unnecessary."
+        },
+        {
+          "claim_idx": 6,
+          "score": 0,
+          "reason": "This chunk mentions Order 2222 required RTOs/ISOs to share information with distribution utilities and incorporate review results into registration, but does not specifically support the claim about sharing information with the aggregator about whether resources affect distribution safety/reliability."
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "The chunk explicitly discusses metering and telemetry requirements as potential barriers to participation and that RTOs/ISOs need metering data for settlement and telemetry for dispatch, supporting the claim about identifying necessary metering/telemetry requirements while avoiding burdensome costs."
+        },
+        {
+          "claim_idx": 8,
+          "score": 1,
+          "reason": "The chunk explicitly states that the distributed energy resource aggregator is the single point of contact with the RTO/ISO and is responsible for managing, dispatching, metering, and settling the individual distributed energy resources."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-oos-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "refuse",
+      "classification": "multi_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 18,
+      "timings_ms": {
+        "classify": 1278,
+        "decompose": 2176,
+        "retrieve_parallel": 4376,
+        "synthesize": 1905
+      },
+      "answer_preview": "The retrieved chunks address Order No. 2222 and distributed energy resource aggregation rules, and do not contain any information about residential rooftop solar net-metering requirements.",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "counsel-001",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.6470588235294118,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 15,
+      "timings_ms": {
+        "classify": 1425,
+        "decompose": 2458,
+        "retrieve_parallel": 4801,
+        "synthesize": 26274,
+        "verify": 0
+      },
+      "answer_preview": "FERC's treatment of state opt-out provisions has evolved through several stages across these orders, reflecting an ongoing tension between federal wholesale market authority and state regulatory prerogatives.\n\n**Order No. 719 (Demand Response Baseline)**\nThe foundational opt-out framework was establ...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "The chunk discusses FERC's jurisdiction over wholesale market participation and preemption principles, but does not specifically describe Order 719 granting RERRAs an opt-out from allowing retail customers to participate through demand response aggregations."
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk c0028 discusses FERC's jurisdiction and preemption but does not address the Commission's discretionary exercise of authority to provide an opt-out."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk c0029 explicitly states the Commission 'considered those effects in evaluating whether to exercise our discretion to grant an opt-out' and references EPSA describing the opt-out as 'notable solicitude toward the States,' supporting that the opt-out was discretionary rather than legally required."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly describes Order 2222's small utility opt-in mechanism modeled on Order 719-A, with the 4 million MWh threshold requiring RERRA affirmative allowance."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly quotes Order No. 745-A with the exact language cited in the claim about load reduction and its effect or value to the wholesale grid."
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "The chunk explicitly states 'we find that the benefits of allowing distributed energy resource aggregators broader access to the wholesale market outweigh the policy considerations in favor of an opt-out. Specifically, we find that the reliability, transparency, and market-related benefits of removing barriers to...' directly supporting the claim."
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "The chunk discusses FERC's jurisdiction and preemption but does not address the distinction between DER aggregators and demand response aggregators regarding sales for resale or public utility status."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "The chunk explicitly states that demand response participation in DER aggregations 'is subject to the opt-out and opt-in requirements of Order Nos. 719 and 719-A. Therefore, if the relevant electric retail regulatory authority where a demand response resource is located has either chosen to opt out or has not opted in, then the demand response resource may not participate in a distributed energy [resource aggregation].'"
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "The chunk explicitly describes Order 2222's small utility opt-in with the exact 4 million MWh threshold and RERRA affirmative allowance requirement."
+        },
+        {
+          "claim_idx": 8,
+          "score": 1,
+          "reason": "The chunk explicitly states 'heterogeneous distributed energy resource aggregations that include demand response do not fall squarely within the Order No. 719 opt-out,' directly supporting the claim."
+        },
+        {
+          "claim_idx": 9,
+          "score": 1,
+          "reason": "The chunk explicitly references Order No. 2222 multiple times and discusses the small utility opt-in applying to 'all [resources participating in Order No. 2222],' supporting the claim about Order 2222."
+        },
+        {
+          "claim_idx": 10,
+          "score": 1,
+          "reason": "The chunk explicitly states 'if a distributed energy resource aggregator aggregates only demand response resources, it is materially indistinct from the aggregations of retail customers subject to the Order No. 719 opt-out,' supporting that the opt-out applies only to demand response-only aggregations."
+        },
+        {
+          "claim_idx": 11,
+          "score": 0,
+          "reason": "Chunk c0047 contains Commissioner Danly's dissent mentioning he dissents for the same reasons as the original order, and that states' interests are not being advocated, but does not specifically argue the Commission clearly has power to establish a broader state opt-out and should have done so for FPA fidelity."
+        },
+        {
+          "claim_idx": 11,
+          "score": 1,
+          "reason": "Chunk c0052 from Danly's dissent explicitly argues Order 2222-A undermines the FPA's division of federal/state authority and invites litigation, supporting the claim that the dissent argued for a broader state opt-out out of fidelity to the FPA framework."
+        },
+        {
+          "claim_idx": 12,
+          "score": 0,
+          "reason": "Chunk c0009 discusses Order 719 demand response opt-out and Order 2222's treatment, but does not specifically reference the NARUC circuit court ruling."
+        },
+        {
+          "claim_idx": 12,
+          "score": 1,
+          "reason": "Chunk c0010 explicitly references the NARUC ruling stating it 'did not conclude that withholding the opt-out was merely a reasonable choice within the Commission's discretion but rather simply a restatement of the well-established principles of federal preemption,' directly supporting the claim about the NARUC ruling."
+        },
+        {
+          "claim_idx": 13,
+          "score": 0,
+          "reason": "The chunk states the Commission 'has not proposed to overturn the Order No. 719 opt-out' and that such requests are out of scope, but does not specifically state the Commission concluded the Order 719 opt-out itself remains just and reasonable."
+        }
+      ],
+      "error": null
+    }
+  ]
+}

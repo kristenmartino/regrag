@@ -1,0 +1,160 @@
+# RegRAG seed corpus manifest
+#
+# Stable list of FERC documents to ingest. Each entry is one document.
+# The accession_number is the canonical FERC eLibrary identifier (YYYYMMDD-NNNN);
+# values shown here are derived from each PDF's first-page header banner — verify
+# during first ingest with the regex `^(\d{8}-\d{4})\s+FERC\s+PDF`.
+#
+# All pdf_urls are HEAD-verified 2026-05-06 unless marked TODO.
+# See feasibility-notes.md §A3 for verification methodology.
+
+documents:
+  # ───────────── Three named orders from the case study ─────────────
+  - order_number: "2222"
+    accession_number: "20200917-3084"  # verify on first ingest
+    docket_numbers: ["RM18-9-000"]
+    document_type: "final_rule"
+    issue_date: "2020-09-17"
+    title: "Participation of Distributed Energy Resource Aggregations in Markets Operated by Regional Transmission Organizations and Independent System Operators"
+    ferc_cite: "172 FERC ¶ 61,247"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-09/E-1_0.pdf"
+    pdf_size_bytes: 2085908
+    notes: "DER aggregation; primary subject of multiple case study example questions"
+
+  - order_number: "841"
+    accession_number: "20180228-3066"  # errata notice version; original Final Rule was 2018-02-15
+    docket_numbers: ["RM16-23-000", "AD16-20-000"]
+    document_type: "final_rule"
+    issue_date: "2018-02-15"
+    title: "Electric Storage Participation in Markets Operated by Regional Transmission Organizations and Independent System Operators"
+    ferc_cite: "162 FERC ¶ 61,127"
+    pdf_url: "https://ferc.gov/sites/default/files/2020-06/Order-841.pdf"
+    pdf_size_bytes: 623155
+    notes: "Storage participation; the version online is the 2018-02-28 errata-corrected text"
+
+  - order_number: "745"
+    accession_number: "20110315-3061"  # verify on first ingest
+    docket_numbers: ["RM10-17-000"]
+    document_type: "final_rule"
+    issue_date: "2011-03-15"
+    title: "Demand Response Compensation in Organized Wholesale Energy Markets"
+    ferc_cite: "134 FERC ¶ 61,187"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/Order-745.pdf"
+    pdf_size_bytes: 357179
+    notes: "Demand response compensation; oldest of the three case-study-named orders"
+
+  # ───────────── Adjacent orders for multi-doc synthesis questions ─────────────
+  - order_number: "2222-A"
+    accession_number: "20210318-3057"  # verify on first ingest
+    docket_numbers: ["RM18-9-001"]
+    document_type: "rehearing_order"
+    issue_date: "2021-03-18"
+    title: "Participation of Distributed Energy Resource Aggregations — Order on Rehearing"
+    ferc_cite: "174 FERC ¶ 61,197"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2021-03/E-1.pdf"
+    pdf_size_bytes: 684840
+    notes: "Rehearing of Order 2222; supports doctrinal-evolution questions"
+
+  - order_number: "845"
+    accession_number: "20180419-3093"  # verify on first ingest
+    docket_numbers: ["RM17-8-000"]
+    document_type: "final_rule"
+    issue_date: "2018-04-19"
+    title: "Reform of Generator Interconnection Procedures and Agreements"
+    ferc_cite: "163 FERC ¶ 61,043"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/Order-845.pdf"
+    pdf_size_bytes: 807214
+    notes: "Interconnection process reform; predecessor to Order 2023; storage-relevant"
+
+  - order_number: "845-A"
+    accession_number: "20190221-3057"  # verify on first ingest
+    docket_numbers: ["RM17-8-001"]
+    document_type: "rehearing_order"
+    issue_date: "2019-02-21"
+    title: "Reform of Generator Interconnection Procedures and Agreements — Order on Rehearing and Clarification"
+    ferc_cite: "166 FERC ¶ 61,137"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/Order-845-A.pdf"
+    pdf_size_bytes: 823378
+    notes: "Rehearing of Order 845"
+
+  - order_number: null  # ANOPR, not a numbered final order
+    accession_number: "20210715-3098"  # verify on first ingest
+    docket_numbers: ["RM21-17-000"]
+    document_type: "anopr"
+    issue_date: "2021-07-15"
+    title: "Building for the Future Through Electric Regional Transmission Planning and Cost Allocation and Generator Interconnection — Advance Notice of Proposed Rulemaking"
+    ferc_cite: "176 FERC ¶ 61,024"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2021-07/RM21-17-000.pdf"
+    pdf_size_bytes: 1036008
+    notes: "ANOPR that preceded Order 1920; supports rulemaking-trajectory questions"
+
+  - order_number: null  # fact sheet, not an order
+    accession_number: null
+    docket_numbers: ["RM18-9-000"]
+    document_type: "fact_sheet"
+    issue_date: "2020-09-17"
+    title: "FERC Order No. 2222: A New Day for Distributed Energy Resources — Fact Sheet"
+    ferc_cite: null
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-09/E-1-facts.pdf"
+    pdf_size_bytes: 162922
+    notes: "Short companion to Order 2222; useful for testing chunker on small docs and for summary-style eval questions"
+
+# ───────────── TODO: discover PDF URLs for these landmark orders ─────────────
+# Search shows these exist but the /sites/default/files/ filename is not derivable
+# from the docket number. Need to either: (a) find via Google for "filetype:pdf"
+# scoped to ferc.gov, (b) use the eLibrary SPA via Playwright, or (c) find a
+# directory listing of /sites/default/files/{YYYY-MM}/.
+#
+# Each adds material breadth to the corpus and supports specific case-study questions.
+
+todo_documents:
+  - order_number: "2023"
+    docket_numbers: ["RM22-14-000"]
+    document_type: "final_rule"
+    issue_date: "2023-07-28"
+    title: "Improvements to Generator Interconnection Procedures and Agreements"
+    ferc_cite: "184 FERC ¶ 61,054"
+    notes: "Major 2023 interconnection reform; would support questions about interconnection evolution"
+
+  - order_number: "2023-A"
+    docket_numbers: ["RM22-14-001"]
+    document_type: "rehearing_order"
+    issue_date: "2024-03-21"
+    title: "Improvements to Generator Interconnection Procedures and Agreements — Order on Rehearing"
+    notes: "Rehearing of Order 2023"
+
+  - order_number: "1920"
+    docket_numbers: ["RM21-17-000"]
+    document_type: "final_rule"
+    issue_date: "2024-05-13"
+    title: "Building for the Future Through Electric Regional Transmission Planning and Cost Allocation"
+    ferc_cite: "187 FERC ¶ 61,068"
+    notes: "Major 2024 transmission planning reform; pairs with the RM21-17 ANOPR already in seed"
+
+  - order_number: "1920-A"
+    docket_numbers: ["RM21-17-001"]
+    document_type: "rehearing_order"
+    issue_date: "2024-11-21"
+    title: "Building for the Future — Order on Rehearing"
+    notes: "Rehearing of Order 1920"
+
+  - order_number: "881"
+    docket_numbers: ["RM20-16-000"]
+    document_type: "final_rule"
+    issue_date: "2021-12-16"
+    title: "Managing Transmission Line Ratings"
+    ferc_cite: "177 FERC ¶ 61,179"
+    notes: "Ambient-adjusted line ratings; supports transmission/grid-efficiency questions"
+
+  - order_number: "881-A"
+    docket_numbers: ["RM20-16-001"]
+    document_type: "rehearing_order"
+    issue_date: "2022-05-19"
+    title: "Managing Transmission Line Ratings — Order on Rehearing"
+    notes: "Rehearing of Order 881"
+
+# Manifest format note:
+# - Both `documents` (verified, ready to fetch) and `todo_documents` (URLs not yet found)
+#   live in this file. The ingest CLI (per implementation-plan.md §2.1) reads only the
+#   `documents` block. Move entries from `todo_documents` → `documents` once you have
+#   a verified `pdf_url` and `pdf_size_bytes`.

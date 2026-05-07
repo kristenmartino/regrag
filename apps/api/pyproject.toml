@@ -1,0 +1,29 @@
+[project]
+name = "regrag-api"
+version = "0.1.0"
+description = "RegRAG API: hybrid retrieval, LangGraph orchestration, FastAPI surface"
+requires-python = ">=3.9"
+dependencies = [
+    "voyageai>=0.3",
+    "anthropic>=0.40",
+    "psycopg[binary]>=3.2",
+    "pgvector>=0.3",
+    "python-dotenv>=1.0",
+    "click>=8.1",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    # langgraph + langchain pinned to compatible series
+    "langgraph>=0.6",
+    "langchain-core>=0.3",
+]
+
+[project.scripts]
+regrag-retrieve = "regrag_api.cli:retrieve"
+regrag-chat = "regrag_api.cli:chat"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

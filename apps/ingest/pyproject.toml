@@ -1,0 +1,27 @@
+[project]
+name = "regrag-ingest"
+version = "0.1.0"
+description = "RegRAG corpus pipeline: fetch FERC PDFs, parse, chunk, embed"
+requires-python = ">=3.9"
+dependencies = [
+    "pdfplumber>=0.11",
+    "pymupdf>=1.26",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+    "click>=8.1",
+    "voyageai>=0.3",
+    "anthropic>=0.40",
+    "psycopg[binary]>=3.2",
+    "pgvector>=0.3",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+regrag-ingest = "regrag_ingest.cli:cli"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,91 @@
+{
+  "summary": {
+    "n_questions": 3,
+    "n_errors": 0,
+    "retrieval_recall_macro": 1.0,
+    "citation_faithfulness_macro": null,
+    "refusal_accuracy": 1.0
+  },
+  "by_persona": {
+    "compliance_analyst": {
+      "n": 2,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "refusal_accuracy": 1.0
+    },
+    "counsel": {
+      "n": 1,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "refusal_accuracy": 1.0
+    }
+  },
+  "by_question": [
+    {
+      "id": "compliance-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 752,
+        "retrieve_single": 1681,
+        "synthesize": 10571,
+        "verify": 0
+      },
+      "answer_preview": "Based on the retrieved chunks, Order 2222 establishes the following reporting and data requirements for distributed energy resource aggregators:\n\n## Registration and Physical Parameters\n\nEach RTO/ISO must revise its tariff to include requirements for distributed energy resource aggregators to establ...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "compliance-oos-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "refuse",
+      "classification": "single_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 1168,
+        "retrieve_single": 1464,
+        "synthesize": 1922
+      },
+      "answer_preview": "The retrieved chunks address wholesale market participation rules for distributed energy resource aggregators, electric storage resource metering, and demand response compensation, but do not address residential rooftop solar net-metering requirements specifically.",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "counsel-001",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 15,
+      "timings_ms": {
+        "classify": 608,
+        "decompose": 2438,
+        "retrieve_parallel": 4657,
+        "synthesize": 25752,
+        "verify": 0
+      },
+      "answer_preview": "Based on the available chunks, I can trace the evolution of FERC's treatment of state opt-out provisions across these orders, though the chunks do not contain detailed information about Order 745 itself (only a brief reference to Order 745-A).\n\n## Evolution of State Opt-Out Provisions\n\n### Order No....",
+      "judge_notes": [],
+      "error": null
+    }
+  ]
+}

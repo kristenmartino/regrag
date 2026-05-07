@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Node (apps/web)
+node_modules/
+.next/
+out/
+.vercel
+.turbo/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Corpus artifacts (gitignored — content-addressable, recreatable from manifest)
+corpus/raw/*.pdf
+corpus/parsed/*.json
+corpus/ingest.log
+corpus/embeddings/
+
+# Generated outputs
+*.log
+*.tmp
+.DS_Store
+.coverage
+htmlcov/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
