@@ -31,7 +31,9 @@ class QuestionResult:
     final_answer: str = ""
     refusal_emitted: bool = False
     refusal_reason: str | None = None
-    citations_stripped: int = 0
+    citations_stripped: int = 0          # chunk-id verifier strips (existence)
+    sentences_stripped: int = 0           # substantive judge whole-sentence drops
+    substantive_citations_stripped: int = 0  # substantive judge per-citation drops within kept sentences
     regeneration_count: int = 0
     timings: dict[str, int] = field(default_factory=dict)
 

@@ -52,6 +52,8 @@ def run_one_question(question: dict, *, run_judge: bool = True) -> QuestionResul
     result.refusal_emitted = bool(state.get("refusal_emitted"))
     result.refusal_reason = state.get("refusal_reason")
     result.citations_stripped = state.get("citations_stripped", 0)
+    result.sentences_stripped = state.get("sentences_stripped", 0)
+    result.substantive_citations_stripped = state.get("substantive_citations_stripped", 0)
     result.regeneration_count = state.get("regeneration_count", 0)
     result.timings = state.get("timings", {})
 
@@ -131,6 +133,8 @@ def report_to_dict(report: AggregateReport) -> dict:
                 "retrieval_recall": r.retrieval_recall,
                 "citation_faithfulness": r.citation_faithfulness,
                 "citations_stripped": r.citations_stripped,
+                "sentences_stripped": r.sentences_stripped,
+                "substantive_citations_stripped": r.substantive_citations_stripped,
                 "regeneration_count": r.regeneration_count,
                 "n_chunks_retrieved": len(r.retrieved_chunks),
                 "timings_ms": r.timings,

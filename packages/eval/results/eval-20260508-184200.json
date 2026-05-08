@@ -1,0 +1,1264 @@
+{
+  "summary": {
+    "n_questions": 28,
+    "n_errors": 0,
+    "retrieval_recall_macro": 0.9833333333333334,
+    "citation_faithfulness_macro": 0.9117647058823529,
+    "refusal_accuracy": 0.8928571428571429
+  },
+  "by_persona": {
+    "compliance_analyst": {
+      "n": 7,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.8333333333333333,
+      "refusal_accuracy": 1.0
+    },
+    "counsel": {
+      "n": 7,
+      "retrieval_recall": 0.9333333333333333,
+      "citation_faithfulness": 0.9125,
+      "refusal_accuracy": 0.8571428571428571
+    },
+    "federal_staff": {
+      "n": 7,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.9375,
+      "refusal_accuracy": 0.8571428571428571
+    },
+    "researcher": {
+      "n": 7,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.9533333333333335,
+      "refusal_accuracy": 0.8571428571428571
+    }
+  },
+  "by_question": [
+    {
+      "id": "compliance-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.3333333333333333,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 1413,
+        "retrieve_single": 2939,
+        "synthesize": 10697,
+        "verify": 5111
+      },
+      "answer_preview": "Based on the retrieved chunks, Order 2222 establishes several reporting and data requirements for distributed energy resource aggregators:\n\n**Registration and Physical Parameters**\nEach RTO/ISO must revise its tariff to require aggregators to submit any necessary physical parameters as part of their...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states the requirement to submit physical parameters as part of registration only to the extent not already represented in general requirements, directly supporting the claim."
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "The chunk begins discussing aggregate settlement data and performance data requirements but is cut off before confirming the specific details claimed (upon request, consistent with other market participants). The chunk supports the general topic but not the specific assertions about 'upon request' and 'consistent with requirements for other market participants'."
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Same chunk, same reasoning - the chunk is truncated and does not confirm 'upon request' or 'consistent with requirements for other market participants'."
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Same chunk, same reasoning - truncated before confirming the specific claims made."
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "The chunk states performance data is necessary for auditing functions and aggregators must maintain it, but does not support the specific claim that aggregators only need to retain data the RTO/ISO 'deems necessary for auditing' with the implication that RTOs/ISOs should not require retention if not needed. The chunk is truncated and doesn't contain this specific nuance."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly discusses metering and telemetry requirements, noting they can pose a barrier to participation and that RTOs/ISOs need metering data for settlement and telemetry data for dispatch, supporting the claim about identifying requirements without imposing unnecessarily burdensome costs."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-002",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 884,
+        "retrieve_single": 1334,
+        "synthesize": 5217,
+        "verify": 1412
+      },
+      "answer_preview": "841 had a compliance deadline of **270 days after publication in the Federal Register**, while its effective date was within 90 days of publication in the Federal Register [[20190221-3057:c0127]]. What is confirmed is the distinction that for RTOs/ISOs generally, the effective date of proposed tarif...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly cites Order No. 841 with 'effective date within 90 days of publication in the Federal Register and compliance deadline within 270 days of publication in the Federal Register' in footnote 327."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states that for each RTO/ISO, 'the effective date of the proposed revisions shall be the date established in the Commission's order accepting that RTO's/ISO's compliance filing, which will be no earlier than the issuance date of such an order.'"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-003",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 877,
+        "retrieve_single": 1613,
+        "synthesize": 6918,
+        "verify": 5512
+      },
+      "answer_preview": "Specifically, an RTO/ISO **must not accept bids** from a distributed energy resource aggregator if its aggregation includes distributed energy resources that are customers of utilities that distributed **4 million MWh or less** in the previous fiscal year, unless the relevant electric retail regulat...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states the 4 million MWh threshold and that customers of such utilities may not participate in DER aggregations unless the relevant electric retail regulatory authority permits it, directly supporting the claim."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk acknowledges the potentially greater burden on smaller utility systems and the inclusion of an opt-in mechanism, supporting the claim about balancing benefits against burdens for small utilities."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "This chunk from the Order 2222 reconsideration explicitly states that 'The Commission found that this opt-in mechanism appropriately balances the benefits that distributed energy resource aggregation can provide to RTO/ISO markets with a recognition of the burdens that such aggregation may create for small utilities in particular,' directly supporting the claim."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-004",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 1,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 1149,
+        "retrieve_single": 1611,
+        "synthesize": 16039,
+        "verify": 2624
+      },
+      "answer_preview": "",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "compliance-005",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 730,
+        "retrieve_single": 1546,
+        "synthesize": 7905,
+        "verify": 1931
+      },
+      "answer_preview": "841 expected that the state of charge of a resource using the electric storage resource participation model would be telemetered in real time when the RTO/ISO manages that resource's state of charge [[20180228-3066:c0156]]. 841 provided each RTO/ISO the flexibility to propose its own telemetry requi...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states the NOPR indicated the Commission's expectation that state of charge would be telemetered in real time when the RTO/ISO manages that resource's state of charge."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states the Commission provides each RTO/ISO flexibility to propose telemetry requirements in compliance filings, consistent with requirements for different services and other market participants."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly states telemetry may be necessary for frequency regulation market participation but less important for capacity or energy provision."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The cited chunk explicitly states 'the Commission did not propose any specific telemetry requirements' in the NOPR proposal section."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-oos-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "refuse",
+      "classification": "single_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 1131,
+        "retrieve_single": 1551,
+        "synthesize": 2990
+      },
+      "answer_preview": "The retrieved chunks do not address residential rooftop solar net-metering requirements; they cover topics such as distributed energy resource aggregator jurisdiction, electric storage resource metering, demand response compensation, and interconnection service, which are only tangentially related t...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "compliance-oos-002",
+      "persona": "compliance_analyst",
+      "expected_behavior": "refuse",
+      "classification": "multi_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 30,
+      "timings_ms": {
+        "classify": 1272,
+        "decompose": 3412,
+        "retrieve_parallel": 6560,
+        "synthesize": 3033
+      },
+      "answer_preview": "The retrieved chunks address regional transmission planning, cost allocation, generator interconnection, electric storage resource market participation (Order 841), and distributed energy resource aggregation \u2014 none of them address cybersecurity standards applicable to investor-owned utilities under...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "counsel-001",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 14,
+      "timings_ms": {
+        "classify": 805,
+        "decompose": 1958,
+        "retrieve_parallel": 4786,
+        "synthesize": 21793,
+        "verify": 7531
+      },
+      "answer_preview": "745 established that demand response resources capable of balancing supply and demand as an alternative to generation must be compensated at LMP when dispatch is cost-effective [[20110315-3061:c0000]]. 2222 required each RTO/ISO to have tariff provisions allowing distributed energy resource (DER) ag...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states that demand response resources with capability to balance supply and demand as an alternative to generation must be compensated at LMP when dispatch is cost-effective per the net benefits test."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states that each ISO and RTO must have tariff provisions that allow distributed energy resource aggregations to participate directly in organized wholesale electric markets."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly describes the small utility opt-in mechanism where RTOs/ISOs must not accept bids from DER aggregators if their aggregation includes customers of utilities distributing 4 million MWh or less, unless the RERRA affirmatively allows such participation."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly states that a RERRA cannot broadly prohibit participation of all distributed energy resources or all DER aggregators in RTO/ISO markets as doing so would interfere with the Commission's statutory obligation to ensure just and reasonable rates."
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "The chunk explicitly discusses the Order No. 719 opt-out not applying to heterogeneous DER aggregations that include demand response, and clarifies the small utility opt-in still applies."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The dissent chunk (c0047) mentions the Commission's decision not to establish a state opt-out and characterizes it as overstepping at the expense of states, supporting the claim about arguing the Commission had authority to establish a broader state opt-out but chose not to."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The chunk (c0049) explicitly argues the Commission should 'stay out of the way when it can' and let states exercise authority over distribution systems and retail sales, supporting the claim about unnecessarily invading state authority."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "The chunk explicitly states 'Order No. 2222-A is not cooperative federalism, but its opposite' and criticizes the regime for undermining state authority, which supports the claim about it being characterized as the opposite of cooperative federalism."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-002",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.9,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 16,
+      "timings_ms": {
+        "classify": 793,
+        "decompose": 2014,
+        "retrieve_parallel": 4865,
+        "synthesize": 21222,
+        "verify": 5916
+      },
+      "answer_preview": "For example, telemetry may be necessary if an electric storage resource is participating exclusively in the frequency regulation market but less important if that resource is providing capacity or energy to the RTOs/ISOs [[20180228-3066:c0156]]. The order also indicated that the state of charge of a...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly contains this example about telemetry being necessary for frequency regulation but less important for capacity or energy provision."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states the NOPR indicated the Commission's expectation that state of charge would be telemetered in real time when the RTO/ISO manages that resource's state of charge."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly states the Commission will not require uniform metering requirements across all RTOs/ISOs, nor impose uniform metering requirements on individual DERs, providing flexibility instead."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly states the DER aggregator is the single point of contact responsible for providing required metering and telemetry information to the RTO/ISO."
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "While the chunk discusses flexibility on individual DER telemetry, it does not specifically mention the factor of whether the RTO/ISO allows multi-node aggregations as a determining factor."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The chunk explicitly directs each RTO/ISO to explain in its compliance filing why its proposed metering requirements are necessary (e.g., for settlement, performance data, preventing double counting) and why telemetry requirements are necessary (e.g., for sufficient situational awareness to dispatch the aggregation efficiently)."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "The chunk explicitly states the Commission proposed each RTO/ISO rely on meter data from distribution utility or local regulatory authority metering system requirements whenever possible, only applying additional requirements when data is insufficient."
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "The chunk mentions CAISO's approach of applying same metering and telemetry standards and NYISO's six-second real-time telemetry at the aggregation level."
+        },
+        {
+          "claim_idx": 8,
+          "score": 1,
+          "reason": "The chunk explicitly states commenters argued telemetry requirements comparable to traditional generators would be prohibitively expensive, especially requiring equipment at every DER site."
+        },
+        {
+          "claim_idx": 9,
+          "score": 1,
+          "reason": "The chunk explicitly mentions EEI and EPSA arguing metering and telemetry requirements should be the same for DER aggregations as for any other resource type for reliability purposes."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-003",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 27,
+      "timings_ms": {
+        "classify": 738,
+        "decompose": 2619,
+        "retrieve_parallel": 6512,
+        "synthesize": 14910,
+        "verify": 3842
+      },
+      "answer_preview": "845 amended the pro forma Large Generator Interconnection Procedures (LGIP) and Large Generator Interconnection Agreement (LGIA) to improve certainty, promote more informed interconnection decisions, and enhance interconnection processes for large generating facilities (those greater than 20 MW) [[2...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Both chunks explicitly state Order 845 amended the pro forma LGIP and LGIA to improve certainty, promote more informed interconnection decisions, and enhance interconnection processes for large generating facilities (>20 MW)"
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly references Order Nos. 2003, 2006, and 845 as establishing standard interconnection procedures and agreements"
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly states 'we agree with commenters that state and local authorities, which have traditionally regulated distributed energy resource interconnections, have the requisite experience, interest, and capacity to oversee these distribution-level interconnections'"
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk states 'We do not believe that requiring standard interconnection procedures and agreement terms for these interconnections is necessary,' which supports the claim that Order 2222 did not require changes to the pro forma Generator Interconnection Procedures/Agreements for DER aggregation purposes"
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "The chunk supports the key distinction: Order 845 established federal standard interconnection procedures to prevent undue discrimination, while for DER aggregations, FERC declined to exercise jurisdiction over distribution-level interconnections, preserving state/local authority, and only applying the 'first use' test for DERs directly seeking wholesale sales"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-004",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.75,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 921,
+        "retrieve_single": 1193,
+        "synthesize": 15598,
+        "verify": 3648
+      },
+      "answer_preview": "Order 2222 draws a clear distinction between homogeneous (single-type) and heterogeneous (mixed-type) distributed energy resource aggregations in several important ways:\n\n**Definition and Composition**\nA heterogeneous aggregation is one consisting of \"different resource types, such that, for example...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly contains ISO-NE's definition of heterogeneous aggregation and the Commission's rejection of homogeneous aggregation arguments, directly supporting the claim."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states that distributed energy resource aggregations can be composed of diverse resource types including energy-efficient lightbulbs, distributed generation, electric vehicles, and smart appliances."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly states that 'in Order No. 2222, the Commission required each RTO/ISO to revise its tariff to allow different types of distributed energy resource technologies to participate in a single distributed energy resource aggregation (i.e., allow heterogeneous distributed energy resource aggregations).'"
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly states the Commission found benefits of allowing heterogeneous aggregations outweigh concerns about complexity and addresses SPP and ISO-NE's arguments about implementation challenges."
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "The claim '719 opt-out' is fragmentary and unclear, and while the chunk discusses the Order No. 719 opt-out, the claim itself is not a coherent assertion that can be substantively supported."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The chunk explicitly states that including demand response in heterogeneous aggregations can allow the aggregation to collectively deliver ancillary services they couldn't provide individually, and can enable the aggregation to collectively satisfy reliability needs to meet certain performance requirements."
+        },
+        {
+          "claim_idx": 6,
+          "score": 0,
+          "reason": "The chunk discusses how precluding demand response from heterogeneous aggregations would undermine removing barriers to participation, but does not specifically mention technology-neutral approach or barriers to entry for emerging technologies as the claim asserts."
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "The chunk explicitly states that 'the distributed energy resource aggregator, not an individual distributed energy resource in the aggregation, is the market participant with whom the RTO/ISO would be interacting' and 'the aggregator, not the RTO/ISO, would be responsible for ensuring that the distributed energy resource aggregation meets applicable RTO/ISO performance' requirements."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-005",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": true,
+      "refusal_correct": false,
+      "retrieval_recall": 0.6666666666666666,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 1228,
+        "retrieve_single": 1522
+      },
+      "answer_preview": "This question doesn't appear to be answerable from the FERC corpus. The closest retrieved passage had a similarity score of 0.35, below the relevance threshold. The system declines to answer rather than speculate beyond what the corpus supports.",
+      "judge_notes": [
+        {
+          "missing_keywords": [
+            "upheld"
+          ]
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-oos-001",
+      "persona": "counsel",
+      "expected_behavior": "refuse",
+      "classification": "single_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 1152,
+        "retrieve_single": 1160,
+        "synthesize": 2043
+      },
+      "answer_preview": "The retrieved chunks address FERC regulations related to electric transmission planning, generator interconnection procedures, wholesale electricity market participation, and distributed energy resources \u2014 none of them address natural gas pipeline construction permits.",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "counsel-oos-002",
+      "persona": "counsel",
+      "expected_behavior": "refuse",
+      "classification": "multi_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 23,
+      "timings_ms": {
+        "classify": 1104,
+        "decompose": 3377,
+        "retrieve_parallel": 4625,
+        "synthesize": 2877
+      },
+      "answer_preview": "The retrieved chunks address regional transmission planning, cost allocation, generator interconnection (ANOPR RM21-17-000), and distributed energy resource aggregation rules (Order No. 2222), and do not contain any substantive discussion of FERC's position on EV charging infrastructure deployment i...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "fedstaff-001",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": true,
+      "refusal_correct": false,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 20,
+      "timings_ms": {
+        "classify": 1130,
+        "decompose": 2886,
+        "retrieve_parallel": 5190,
+        "synthesize": 3184
+      },
+      "answer_preview": "The retrieved chunks discuss the Order 2222 rulemaking process, technical conference topics, and final rule determinations, but do not specifically summarize the major issues that RTO commenters raised in response to the Order 2222 NOPR itself. The chunks reference some RTO positions on specific top...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "fedstaff-002",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 709,
+        "retrieve_single": 1755,
+        "synthesize": 9340,
+        "verify": 3816
+      },
+      "answer_preview": "Based on the available chunks, several concerns raised by state regulatory authorities and related commenters during the Order 841 rulemaking can be identified:\n\n**Jurisdictional/Authority Concerns:**\n- Numerous commenters questioned the Commission's authority to require RTOs/ISOs to accommodate the...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk discusses the NOPR proposal requiring RTOs/ISOs to accommodate DER aggregations and mentions that the Commission did not propose a mechanism for retail regulatory authorities to authorize or prohibit participation, supporting the claim about jurisdictional concerns."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states the Commission did not propose a mechanism by which relevant electric retail regulatory authorities could authorize or prohibit participation of DERs or DER aggregators in RTO/ISO markets, supporting the claim about commenters wanting opt-in/opt-out authority."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly quotes Xcel Energy Services arguing that the applicable state has authority to establish parameters of the participation model (not the RTO/ISO) and that the Commission should not usurp states' authority to address arbitrage between retail and wholesale consumption."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly states that multiple United States senators urged the Commission to preserve the authority of state and local authorities over distribution utilities with respect to DER aggregators, and expressed concern about the final rule's negative effect on their ability to regulate retail and distribution service."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-003",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 706,
+        "retrieve_single": 1569,
+        "synthesize": 9244,
+        "verify": 3273
+      },
+      "answer_preview": "2222, along with their main concerns:\n\n**Public Interest Organizations** raised several concerns:\n- They requested clarification that coordination with RERRAs should not unjustly limit distributed energy resource aggregators' access to wholesale markets [[20210318-3057:c0044]]\n- They requested clari...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Chunk explicitly describes Public Interest Organizations' request for clarification that RERRA coordination should not unjustly limit DER aggregators' access to wholesale markets"
+        },
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Chunk explicitly describes Public Interest Organizations' request for clarification that aggregators should receive any information a distribution utility provides an RTO/ISO regarding one of its resources, whether related to registration or ongoing operational coordination"
+        },
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Same chunk as pair 1, supports the same claim about Public Interest Organizations' information sharing request"
+        },
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Chunk discusses the 4 million MWh threshold and explicitly addresses the argument that it is not supported by substantial evidence or is outdated, directly supporting the claim about this concern"
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk explicitly describes AEE/AEMA's request for clarification that Order No. 719 opt-out/opt-in requirements apply only to the non-injection portion of an individual DER, not to the injection portion"
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk explicitly references AEE/AEMA and Public Interest Organizations' argument that energy efficiency resources by nature have no negative reliability impacts, supporting the claim about this concern regarding the distribution utility review process"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-004",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.9166666666666666,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 716,
+        "retrieve_single": 1509,
+        "synthesize": 18695,
+        "verify": 6939
+      },
+      "answer_preview": "Here is a summary of the principal proposals:\n\n## Overview and Motivation\n\nThe ANOPR was prompted by concerns that the current transmission planning and cost allocation approach cannot adequately meet future transmission needs in a just and reasonable manner, particularly as the resource mix shifts ...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states concerns about the current approach to transmission planning and cost allocation not meeting future needs, with renewables located far from load centers, matching the claim."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly contains the phrase 'inefficient, piecemeal expansion of the transmission grid' and states it would be 'far more expensive for customers than a more forward-looking, holistic approach.'"
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly states 'the regional transmission planning process would identify transmission facilities that support future scenarios, including anticipated future generation.'"
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly lists CREZ, MISO MVP, and CAISO approaches and asks whether they 'are models for any potential requirements.'"
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "The chunk explicitly seeks comment on whether the regional transmission planning process 'could be structured in such a way that is more collaborative, relying on the knowledge and experience that transmission providers, project developers, state commissions, and other stakeholders have regarding optimal locations, the topography of the transmission network.'"
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The chunk explicitly seeks comment on 'developing new regional transmission cost allocation methods that measure all of the benefits of regional transmission facilities... that accrue to both transmission and interconnection customers.'"
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "The chunk explicitly states 'it may be difficult to precisely quantify some of the benefits of transmission facilities, which can be a barrier to more broadly allocating the costs.'"
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "The chunk explicitly seeks comment on whether the ROE adder for RTO/ISO participation 'should be limited in applicability only to regional, and not local, transmission facilities, when those regional transmission facilities are selected as the more efficient or cost-effective solution.'"
+        },
+        {
+          "claim_idx": 8,
+          "score": 1,
+          "reason": "The chunk explicitly seeks comment on 'whether reforms to the current interregional transmission coordination process, including potentially requiring interregional transmission planning, are needed or appropriate.'"
+        },
+        {
+          "claim_idx": 9,
+          "score": 0,
+          "reason": "This chunk discusses the general context of the ANOPR (resource mix shifting, grid reliability) but does not specifically address generator interconnection funding, queueing processes, or consumer protection as claimed."
+        },
+        {
+          "claim_idx": 9,
+          "score": 1,
+          "reason": "The chunk explicitly mentions 'improve pricing and cost allocation for interconnection-related network upgrades' and discusses interconnection customers as beneficiaries, supporting the claim about generator interconnection cost allocation."
+        },
+        {
+          "claim_idx": 10,
+          "score": 1,
+          "reason": "The chunk explicitly contains Commissioner Danly's statement flagging jurisdictional authority ('is it within our jurisdiction? That is always the threshold question') and ratepayer costs ('what will be the ultimate effect on ratepayers?') as threshold questions for every proposal."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-005",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.8333333333333334,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 795,
+        "retrieve_single": 1747,
+        "synthesize": 6445,
+        "verify": 2985
+      },
+      "answer_preview": "**Capability condition**: The demand response resource must have the capability to balance supply and demand as an alternative to a generation resource [[20110315-3061:c0002]]. **Cost-effectiveness condition**: The dispatch of that demand response resource must be cost-effective as determined by the...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states the capability condition: demand response resource must have capability to balance supply and demand as an alternative to a generation resource"
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Both chunks explicitly state the cost-effectiveness condition determined by the net benefits test"
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk c0059 explicitly states the net benefits test requirement for cost-effectiveness determination"
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "Chunk explicitly states RTOs/ISOs must perform the net benefits test 'on a monthly basis' to determine when it is cost-effective to pay full LMP"
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly states the rule does not apply to programs for reliability or emergency conditions, with specific examples given"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "The cited chunk discusses comparable compensation to supply-side resources generally but does not explicitly state that when the two conditions are met the RTO/ISO must pay full LMP just as it would a generation resource - it discusses the framework broadly without the specific 'full LMP equivalent to generation' assertion"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-oos-001",
+      "persona": "federal_staff",
+      "expected_behavior": "refuse",
+      "classification": "single_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 644,
+        "retrieve_single": 1203,
+        "synthesize": 2190
+      },
+      "answer_preview": "The retrieved chunks address FERC regulatory orders related to interconnection, DER aggregation, and information collection burdens\u2014none of them contain information about FERC's annual budget appropriation for fiscal year 2025.",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "fedstaff-oos-002",
+      "persona": "federal_staff",
+      "expected_behavior": "refuse",
+      "classification": "multi_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 22,
+      "timings_ms": {
+        "classify": 1423,
+        "decompose": 2036,
+        "retrieve_parallel": 4611,
+        "synthesize": 2244
+      },
+      "answer_preview": "The retrieved chunks address FERC orders on electric storage resource participation (Order No. 841) and distributed energy resource aggregation (Order No. 2222), and do not contain any information about the FERC Office of Enforcement's investigation procedures for tariff violations.",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "researcher-001",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.9333333333333333,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 23,
+      "timings_ms": {
+        "classify": 932,
+        "decompose": 5126,
+        "retrieve_parallel": 6211,
+        "synthesize": 21543,
+        "verify": 8994
+      },
+      "answer_preview": "**Order 745 (Demand Response Compensation)**\n\nOrder 745 acknowledged that demand response jurisdiction is a \"complex matter that lies at the confluence of state and federal jurisdiction,\" but firmly asserted that the Commission has jurisdiction over demand response in organized wholesale energy mark...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Chunk explicitly states Commission has jurisdiction over demand response in organized wholesale energy markets because it directly affects wholesale rates, and confirms jurisdiction to regulate market rules under which ISO or RTO accepts demand response bids."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk explicitly states the Commission 'is not regulating retail rates or usurping or impeding state regulatory efforts concerning demand response' and that the Final Rule 'is not intended to usurp state authority' but rather to fulfill its statutory mandate."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "Chunk explicitly states 'the Commission has jurisdiction to regulate the market rules under which an ISO or RTO accepts a demand response bid into a wholesale market,' supporting the functional line drawn between federal and state authority."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "Chunk explicitly states that 'establishing the criteria for participation in RTO/ISO markets, including with respect to resources located on the distribution system or behind the meter, is essential to the Commission's ability to fulfill its statutory responsibility to ensure that wholesale rates are just and reasonable.'"
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "Chunk references the D.C. Circuit's finding that 'Order No. 841 does not usurp[] state power' and notes that retail regulatory authorities can condition DER participation in retail programs on not also participating in RTO/ISO markets, supporting the claim about preserved state authority."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "Chunk explicitly states the Commission has 'exclusive jurisdiction over the wholesale markets and the criteria for participation in those markets, including the wholesale market rules for participation of resources connected at or below distribution-level voltages' in the context of Order 2222."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "Chunk explicitly states Order No. 2222 asserted exclusive jurisdiction over wholesale markets and participation criteria including for resources at or below distribution-level voltages, directly confirming the claim."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "Chunk explicitly states that 'a relevant electric retail regulatory authority cannot broadly prohibit the participation in RTO/ISO markets of all distributed energy resources or of all distributed energy resource aggregators as doing so would interfere with the Commission's statutory obligation.'"
+        },
+        {
+          "claim_idx": 6,
+          "score": 0,
+          "reason": "This chunk discusses exclusive jurisdiction but does not specifically address the prohibition on RREAs broadly prohibiting DER participation; it focuses on the exclusive jurisdiction claim rather than the broad prohibition finding."
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "Chunk explicitly quotes that the D.C. Circuit's statement was 'simply a restatement of the well-established principles of federal preemption,' directly supporting the claim."
+        },
+        {
+          "claim_idx": 8,
+          "score": 1,
+          "reason": "Chunk explicitly states 'Order No. 2222 and this order on rehearing address the rules governing wholesale market participation' and 'today's order does not infringe upon or otherwise diminish state authority,' supporting the claim."
+        },
+        {
+          "claim_idx": 9,
+          "score": 1,
+          "reason": "Chunk explicitly states the Commission 'is not regulating retail rates or usurping or impeding state regulatory efforts concerning demand response' and the Final Rule 'is not intended to usurp state authority,' supporting the summary characterization of Order 745."
+        },
+        {
+          "claim_idx": 10,
+          "score": 1,
+          "reason": "Chunk references the D.C. Circuit's finding that Order 841 does not usurp state power and notes retail regulatory authorities can condition DER participation in retail programs, supporting the preservation of residual state authority."
+        },
+        {
+          "claim_idx": 11,
+          "score": 1,
+          "reason": "Chunk confirms exclusive FERC jurisdiction over DER aggregation participation rules in Order 2222, supporting the claim about asserting exclusive jurisdiction, though it does not explicitly address the demand-response opt-out aspect."
+        },
+        {
+          "claim_idx": 11,
+          "score": 1,
+          "reason": "Chunk confirms Order 2222 addresses wholesale market participation under exclusive Commission jurisdiction and 'does not infringe upon or otherwise diminish state authority,' supporting the claim's core assertions about exclusive jurisdiction and preserved state authority."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-002",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 23,
+      "timings_ms": {
+        "classify": 682,
+        "decompose": 3326,
+        "retrieve_parallel": 6600,
+        "synthesize": 20174,
+        "verify": 6651
+      },
+      "answer_preview": "Circuit's ruling in NARUC \u2014 which held that Order 841 did not usurp state power and that FERC has exclusive authority to determine who may participate in wholesale markets \u2014 is cited repeatedly as legal support for Order 2222 [[20210318-3057:c0008]] [[20200917-3084:c0027]]. Circuit affirmance of Ord...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly cites NARUC 964 F.3d at 1187-88 for FERC's exclusive jurisdiction over wholesale market participation and notes that Order 841 'does not usurp state power,' directly supporting the claim."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk references NARUC 964 F.3d at 1188 affirming Order 841's no-opt-out decision, noting it was 'neither unexplained nor unsupported,' directly supporting the claim about D.C. Circuit affirmance."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly cites NARUC 964 F.3d at 1190 pointing to the Commission's consideration of benefits including 'competition,' 'prices,' and 'diversity' of resource types when affirming Order 841, and the Order 2222 document uses the same reasoning."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly states that 'a regulatory authority is able to condition a distributed energy resource's participation in a retail distributed energy resource program on that resource not also participating in the RTO/ISO markets,' recognizing this as acknowledged in Order 841 and preserved in Order 2222."
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "The chunk explicitly states that 'if the RERRA for a demand response resource has either chosen to opt out or has not opted in, then the demand response resource may not participate in a distributed energy resource aggregation,' directly supporting the claim."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The chunk explicitly lists the DER types including 'electric storage, intermittent generation, distributed generation, demand response, energy efficiency, thermal storage or electric vehicles and their charging equipment' and describes aggregations enabling participation in wholesale markets."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The chunk explicitly lists the same DER types and mentions the ability of aggregations to 'take advantage of the different resources' operational attributes and complementary capabilities,' supporting the claim about heterogeneous aggregations."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "The chunk explicitly describes the coordination requirements in Order 2222 including information sharing, distribution utility review processes, and ongoing operational coordination among RTOs/ISOs, aggregators, and distribution utilities."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "The chunk explicitly describes RERRA involvement requirements in Order 2222's coordination framework, supporting the claim about coordination requirements going beyond Order 841's framework."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-003",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 1,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 26,
+      "timings_ms": {
+        "classify": 984,
+        "decompose": 2806,
+        "retrieve_parallel": 6524,
+        "synthesize": 25876,
+        "verify": 7762
+      },
+      "answer_preview": "745 established the foundational rule that demand response resources participating in organized wholesale energy markets must be compensated at the full locational marginal price (LMP) when they have the capability to balance supply and demand as an alternative to a generation resource and when disp...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk directly states the rule requires demand response resources to be compensated at LMP when they can balance supply and demand as an alternative to generation and when dispatch is cost-effective under the net benefits test."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states that improving competitiveness of wholesale energy markets is integral to the Commission fulfilling its statutory mandate under the FPA to ensure just, reasonable, and not unduly discriminatory rates."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly lists lack of dynamic retail prices, lack of real-time information sharing, and lack of market incentives to invest in enabling technologies as barriers to demand response participation."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The chunk explicitly states the Commission is not regulating retail rates or usurping state regulatory efforts, and that it is acting to fulfill its own statutory responsibility over wholesale rates."
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "The chunk explicitly states Commissioner Moeller's position that LMP-G is the only economically efficient outcome and that the rule violates the Commission's statutory mandate."
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "The chunk discusses Order 2222 and barriers preventing distributed energy resources (including demand response) from participating in RTO/ISO markets, supporting the claim about requiring rules for DER aggregation participation."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "The chunk describes how existing market rules create barriers for distributed energy resource aggregations including demand response, limiting services they can provide, supporting the unjust and unreasonable finding."
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "The chunk explicitly references Order No. 841 as precedent cited in Order No. 2222 for the Commission's exclusive jurisdiction over wholesale market participation criteria."
+        },
+        {
+          "claim_idx": 8,
+          "score": 1,
+          "reason": "The chunk explicitly states that applying the opt-out to distributed energy resource aggregations would undermine competition and interfere with the Commission's responsibility to ensure just and reasonable wholesale rates."
+        },
+        {
+          "claim_idx": 9,
+          "score": 1,
+          "reason": "The chunk directly quotes Order No. 745-A stating that from the grid's perspective, the manner of achieving load reduction does not change the effect or value to the wholesale grid."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-004",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.8333333333333334,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 15,
+      "timings_ms": {
+        "classify": 815,
+        "decompose": 1833,
+        "retrieve_parallel": 3137,
+        "synthesize": 14384,
+        "verify": 4337
+      },
+      "answer_preview": "845, issued on April 19, 2018, was the foundational rulemaking that amended the Commission's pro forma Large Generator Interconnection Procedures (LGIP) and pro forma Large Generator Interconnection Agreement (LGIA) to improve certainty for interconnection customers, promote more informed interconne...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Chunk explicitly states Order No. 845 was issued on April 19, 2018 and revised the pro forma LGIP and LGIA to improve certainty, promote informed decisions, and enhance the interconnection process."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk confirms ten reforms in three general categories, and begins listing them including the option to build expansion, matching the claim's description."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "Chunk explicitly states interconnection customers may reduce requested level of service at two points: prior to returning an executed system impact study agreement and prior to returning an executed facilities study agreement."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "Chunk explicitly discusses the permissible technological advancement provision, clarifying it requires transmission providers to develop a definition and explaining how it fits within the existing material modification framework."
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk acknowledges the problem of late-stage withdrawals and that reforms will benefit both parties, but does not explicitly state Order 845 reforms were 'intended to reduce late-stage withdrawals' as a primary purpose."
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "Chunk explicitly states the Commission designed Order No. 845 reforms to provide better information to reduce late-stage withdrawals, directly supporting the claim."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-005",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 626,
+        "retrieve_single": 1712,
+        "synthesize": 10157,
+        "verify": 2555
+      },
+      "answer_preview": "2222 required each RTO/ISO to establish distributed energy resource aggregators as a type of market participant and to allow them to register distributed energy resource aggregations under **one or more participation models** in the RTO/ISO tariff that accommodate the physical and operational charac...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states that the Commission required each RTO/ISO to establish DER aggregators as market participants and allow registration under one or more participation models accommodating physical and operational characteristics."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly states the three compliance options: modifying existing participation models, establishing new ones, or combining both approaches. However, the claim about 'flexibility' and 'efficient and cost-effective' language is not directly in the chunk, though the three approaches are confirmed."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "The chunk explicitly contains AEE/AEMA's assertion that compliance through 'a disparate collection of participation models, with separate registration, metering, and interconnection processes' would be problematic, matching the claim."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-oos-001",
+      "persona": "researcher",
+      "expected_behavior": "refuse",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 25,
+      "timings_ms": {
+        "classify": 1217,
+        "decompose": 3285,
+        "retrieve_parallel": 6276,
+        "synthesize": 17510,
+        "verify": 5975
+      },
+      "answer_preview": "The chunks reveal several key distinctions and tensions between FERC's regulatory approach and state PUC oversight of distribution utilities:\n\n**Division of Jurisdictional Authority**\nThe Federal Power Act delineates distinct spheres: the federal government (via FERC) is tasked with ensuring just an...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "researcher-oos-002",
+      "persona": "researcher",
+      "expected_behavior": "refuse",
+      "classification": "multi_doc",
+      "refusal_emitted": true,
+      "refusal_correct": true,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 36,
+      "timings_ms": {
+        "classify": 1287,
+        "decompose": 3834,
+        "retrieve_parallel": 8672,
+        "synthesize": 3500
+      },
+      "answer_preview": "The retrieved chunks address wholesale market compensation rules for demand response resources, electric storage participation, and distributed energy resource aggregations, but do not directly address the impact of FERC orders on retail consumer electricity prices.",
+      "judge_notes": [],
+      "error": null
+    }
+  ]
+}

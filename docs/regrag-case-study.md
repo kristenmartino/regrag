@@ -104,7 +104,13 @@ This is the section that matters most for a regulated deployment, and it is wher
 
 **Grounding constraints** are enforced through the system prompt and the retrieval interface jointly. The generation step receives only the retrieved chunks and is instructed to refuse questions the corpus does not support. A query like "what is FERC's position on residential rooftop solar permitting" returns a refusal with an explanation that residential permitting is generally a state-level matter and the corpus does not contain authoritative federal guidance on it. The refusal is the deliverable; manufacturing an answer would be the failure.
 
-**Citation verification** runs as a post-generation step. Every claim in the generated response is checked against the retrieved chunks (regex extraction of `[[chunk_id]]` markers, lookup against the retrieved set), and any citation that does not map to an actual passage is removed before the response is returned. The regeneration loop is bounded at two attempts; after that, invalid citations are stripped and the answer is finalized. On the current 28-question eval, the LLM-as-judge measures **citation faithfulness at 70.3%** — meaning ~30% of cited claims are attributed to chunks that don't substantively support them. Most failures are the same shape: the model cites a chunk that is *topically* about the right area but doesn't contain the specific assertion the answer makes (a chunk discussing commenter views vs. a chunk stating the Commission's rule, for instance). Catching these cases — both for verification at runtime and for measurement during eval — is the whole point.
+**Citation verification** runs as a two-step post-generation pipeline.
+
+Step one is the cheap structural check: regex-extract the `[[chunk_id]]` markers from the draft, look each one up against the set of retrieved chunk IDs, strip any that don't match. This catches hallucinated citations (chunk_ids the model invented) but does not catch *misattributed* ones — claims that point to a real chunk that doesn't actually say what the model claims it says. The eval surfaced this as the dominant failure mode: ~30% of cited claims, in the baseline configuration, were attached to chunks that were *topically* on point but didn't contain the specific assertion the answer made (citing a chunk discussing commenter views to support a claim about the Commission's ruling, for instance).
+
+Step two addresses that. After the structural check passes, a small Haiku call scores each (sentence, cited_chunk) pair 0/1 for substantive support, using the same methodology the offline LLM-as-judge uses during eval. Sentences whose every citation scores 0 are dropped from the final answer; sentences with a mix lose just the unsupported citations; if the strip rate exceeds 50% the verifier signals regeneration (bounded at two attempts before giving up and shipping the partial). The added cost is one Haiku call per response (~$0.005, ~3s latency). The benefit, measured against the 28-question eval, is citation faithfulness rising from 70.3% to **91.2%** — the runtime judge filters out the misattributed claims that the structural check can't catch.
+
+The regeneration loop and the final fallback to "ship the partial, log the strip" are both deliberate. Refusing wholesale or looping indefinitely would be the worse failure modes for the user; surfacing a shorter answer with cleaner citations matches what a human reviewer would actually do.
 
 **Audit logging** captures, for every interaction: a timestamp, the user identifier, the raw query, the classification decision, the decomposed sub-queries (if any), the retrieved chunks with their document and section provenance, the prompt sent to the generation model, the model identifier and version, the raw model response, the verified response returned to the user, and the latency and token counts for each stage. The schema is append-only and partitioned by date.
 
@@ -133,10 +139,12 @@ The eval harness runs on every change to retrieval, chunking, or generation para
 | Metric | Score | Notes |
 |---|---|---|
 | Retrieval recall | **98.3%** | Macro-averaged over 20 answer-expected questions |
-| Refusal accuracy | **89.3%** | 25/28 — 3 borderline OOS researcher questions got qualified answers instead of refusal |
-| Citation faithfulness | **70.3%** | LLM-as-judge over all cited claims; lowest on questions that conflate commenter views with Commission rulings |
+| Refusal accuracy | **89.3%** | 25/28 — 3 borderline questions on the answer/refuse boundary |
+| Citation faithfulness | **91.2%** | LLM-as-judge over cited claims, after the runtime substantive-support filter described in §5 stripped misattributed citations |
 
-Per-persona breakdown shows the expected pattern: comparative researcher questions are hardest (refusal 71%, faithfulness 65%) and single-doc compliance questions are easiest (refusal 100%, faithfulness 72%). The full per-question report including judge rationale lives in `packages/eval/results/`.
+The citation-faithfulness number reflects the post-§5 cleaned answer. The pre-filter baseline (chunk-id verification only, no substantive judge) was **70.3%**; turning on the inline judge moved that to 91.2%, with the largest gains on the federal-staff and policy-researcher personas — exactly the questions where the model was most prone to citing topically-related but substantively-unsupportive chunks.
+
+Per-persona breakdown still shows comparative researcher questions are the hardest (refusal 86%, faithfulness 95%) and single-doc compliance questions are easiest (refusal 100%, faithfulness 83% — the lower CF here reflects fewer claims to grade, not worse quality). The full per-question report including judge rationale lives in [docs/eval-results.md](eval-results.md) and the raw `packages/eval/results/` JSON.
 
 ---
 

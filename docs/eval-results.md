@@ -1,29 +1,52 @@
 # RegRAG Evaluation Results
 
-Latest run: **2026-05-07** against the 28-question seed set. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier) + claude-sonnet-4-6 (decomposer + synthesizer + judge).
+Latest run: **2026-05-08** against the 28-question seed set. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge).
 
-Raw report: [eval-20260507-044907.json](../packages/eval/results/eval-20260507-044907.json).
+Raw reports: [eval-20260508-184200.json](../packages/eval/results/eval-20260508-184200.json) (current) · [eval-20260507-044907.json](../packages/eval/results/eval-20260507-044907.json) (baseline, before inline judge).
 
 ---
 
 ## Headline metrics
 
-| Metric | Score | Methodology |
-|---|---|---|
-| **Retrieval recall** | **98.3%** | Macro-averaged over 20 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
-| **Refusal accuracy** | **89.3%** | 25 of 28 questions correctly refused-when-OOS or answered-when-in-scope |
-| **Citation faithfulness** | **70.3%** | LLM-as-judge (Sonnet) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
+| Metric | Score | Δ vs. baseline | Methodology |
+|---|---|---|---|
+| **Retrieval recall** | **98.3%** | — | Macro-averaged over 20 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
+| **Refusal accuracy** | **89.3%** | — | 25 of 28 questions correctly refused-when-OOS or answered-when-in-scope. Two improvements + two regressions vs. baseline (see "Refusal shifts" below) |
+| **Citation faithfulness** | **91.2%** | **+20.9 pp** | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
+
+The citation-faithfulness gain is the result of a runtime intervention: a second-step judge runs inline as part of `verify` (Haiku, ~$0.005 per chat call, ~3s added latency) and strips claims whose citations don't substantively support them. See "Architecture change driving the CF gain" below.
 
 ## Per-persona breakdown
 
-| Persona | n | Refusal | Recall | Citation faithfulness |
-|---|---|---|---|---|
-| compliance_analyst | 7 | **100%** | **100%** | 71.9% |
-| counsel | 7 | 85.7% | 93.3% | **81.4%** |
-| federal_staff | 7 | **100%** | **100%** | 65.4% |
-| researcher | 7 | 71.4% | **100%** | 64.8% |
+| Persona | n | Refusal | Recall | Citation faithfulness | CF Δ |
+|---|---|---|---|---|---|
+| compliance_analyst | 7 | **100%** | **100%** | 83.3% | +11.4 pp |
+| counsel | 7 | 85.7% | 93.3% | 91.2% | +9.8 pp |
+| federal_staff | 7 | 85.7% | **100%** | 93.8% | **+28.4 pp** |
+| researcher | 7 | 85.7% | **100%** | **95.3%** | **+30.5 pp** |
 
-Comparative researcher questions are hardest (refusal 71%, faithfulness 65%). Single-doc compliance + federal-staff questions are easiest. This matches the design intuition: the agentic decomposition layer earns its place on the comparative cases, but the model is also more likely to overreach when synthesizing across documents.
+The personas with the lowest baseline CF (federal_staff and researcher) saw the biggest gains. Their questions had the most claims that paraphrased commenter views or jurisdictional discussion as Commission rulings — exactly the failure mode the inline judge targets.
+
+## Architecture change driving the CF gain
+
+The baseline verifier did one check: do the cited `chunk_id`s exist in the retrieved set? That catches hallucinated citations but doesn't catch *misattributed* citations — claims that point to a real chunk that just doesn't say what the model claims it says. The eval surfaced this as the dominant failure pattern (~30% of cited claims).
+
+The new verifier adds a second step. After the chunk-id presence check passes, a small Haiku call scores each (sentence, cited_chunk) pair 0/1 for substantive support. The same methodology the offline Sonnet judge uses — just runtime, cheaper, and with action: drop unsupported sentences from the final answer; drop individual citations from sentences with a mix; if the strip rate exceeds 50%, regenerate (bounded by the existing 2-attempt cap).
+
+Code: [`apps/api/src/regrag_api/verification/substantive.py`](../apps/api/src/regrag_api/verification/substantive.py). Wired into the verify node in [`nodes/verify.py`](../apps/api/src/regrag_api/orchestration/nodes/verify.py).
+
+## Refusal shifts vs. baseline
+
+Same 89.3% in aggregate, but four questions changed behavior:
+
+| Question | Expected | Baseline | Now | Direction |
+|---|---|---|---|---|
+| counsel-003 | answer | wrong (refused) | **correct (answered)** | improvement |
+| researcher-oos-002 | refuse | wrong (answered) | **correct (refused)** | improvement |
+| counsel-005 | answer | correct (answered) | wrong (refused) | regression |
+| fedstaff-001 | answer | correct (answered) | wrong (refused) | regression |
+
+The two regressions are the cost of the more aggressive verifier: on questions where the chunks are weakly aligned with the claim, the substantive judge strips most sentences, the system regenerates twice with no improvement, and what's left ends up empty enough to look like a refusal. Tuning levers if these become a pattern: raise the strip-rate-→-regen threshold from 50% to 70%, improve the synthesis prompt to pick chunks more deliberately, or accept partial answers rather than refusing on heavily-stripped drafts.
 
 ## Where the system fails
 
