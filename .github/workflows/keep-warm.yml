@@ -1,0 +1,37 @@
+name: keep-warm
+
+# Pings the Railway backend every 5 minutes to keep the free-tier container
+# warm. First request after idle takes 30-60s to cold-start, which silently
+# kills first-impression UX. GitHub Actions schedule is best-effort (the
+# minimum interval is 5 min and runs may be delayed during high load), but
+# in practice it keeps the demo responsive during business hours.
+#
+# The frontend's mount-time pre-warm in components/chat.tsx is the backup —
+# even if a cron run is missed, the user sees the warming hint and the
+# backend is woken before their first query.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:  # allow manual trigger from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping Railway /health
+        run: |
+          start=$(date +%s)
+          status=$(curl -sS -o /tmp/body -w "%{http_code}" --max-time 60 \
+            https://regrag-api-production.up.railway.app/health)
+          elapsed=$(( $(date +%s) - start ))
+          body=$(head -c 200 /tmp/body)
+          echo "status=$status elapsed=${elapsed}s body=$body"
+          if [ "$status" != "200" ]; then
+            echo "::error::Backend unhealthy (status=$status, elapsed=${elapsed}s)"
+            exit 1
+          fi
+          if [ "$elapsed" -gt 25 ]; then
+            echo "::warning::Cold start detected: took ${elapsed}s"
+          fi
