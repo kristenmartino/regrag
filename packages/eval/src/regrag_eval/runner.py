@@ -11,6 +11,7 @@ from typing import Iterable
 
 import yaml
 
+from regrag_api.baseline import run_baseline
 from regrag_api.orchestration.graph import run as run_graph
 
 from .judge import judge_citations
@@ -30,7 +31,9 @@ def load_eval_set(path: Path) -> list[dict]:
     return raw.get("questions", [])
 
 
-def run_one_question(question: dict, *, run_judge: bool = True) -> QuestionResult:
+def run_one_question(
+    question: dict, *, run_judge: bool = True, mode: str = "regrag"
+) -> QuestionResult:
     qid = question["id"]
     persona = question["persona"]
     expected_behavior = question["expected_behavior"]
@@ -39,7 +42,10 @@ def run_one_question(question: dict, *, run_judge: bool = True) -> QuestionResul
     result = QuestionResult(id=qid, persona=persona, expected_behavior=expected_behavior)
 
     try:
-        state = run_graph(query, user_id="eval-runner")
+        if mode == "baseline":
+            state = run_baseline(query, user_id="eval-runner-baseline")
+        else:
+            state = run_graph(query, user_id="eval-runner")
     except Exception as e:
         log.error("question %s crashed: %s", qid, e)
         result.error = f"{type(e).__name__}: {e}"
@@ -92,6 +98,7 @@ def run_all(
     questions: Iterable[dict],
     *,
     run_judge: bool = True,
+    mode: str = "regrag",
     progress_callback=None,
 ) -> AggregateReport:
     results: list[QuestionResult] = []
@@ -100,7 +107,7 @@ def run_all(
         if progress_callback:
             progress_callback(i, len(questions), q["id"])
         t0 = time.perf_counter()
-        r = run_one_question(q, run_judge=run_judge)
+        r = run_one_question(q, run_judge=run_judge, mode=mode)
         elapsed = int((time.perf_counter() - t0) * 1000)
         log.info(
             "[%d/%d] %s persona=%s expected=%s → refused=%s recall=%s cf=%s in %dms",

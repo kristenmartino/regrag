@@ -68,13 +68,14 @@ def cli(verbose: int):
     help="Run only questions for this persona",
 )
 @click.option("--no-judge", is_flag=True, help="Skip the LLM-as-judge citation faithfulness step (faster, cheaper)")
+@click.option("--baseline", is_flag=True, help="Run the naive RAG baseline (pure vector + plain Sonnet, no agentic, no verification) instead of the full RegRAG pipeline. Useful for comparing what the agentic + verification layers buy us.")
 @click.option(
     "--out-dir",
     type=click.Path(file_okay=False, path_type=Path),
     default=None,
     help="Where to write the JSON report (default: packages/eval/results/)",
 )
-def run(eval_set_path, id_filter, persona, no_judge, out_dir):
+def run(eval_set_path, id_filter, persona, no_judge, baseline, out_dir):
     """Run the eval and produce a report."""
     if eval_set_path is None:
         eval_set_path = _default_eval_set_path()
@@ -90,12 +91,13 @@ def run(eval_set_path, id_filter, persona, no_judge, out_dir):
         click.echo("No questions match the filter.", err=True)
         sys.exit(1)
 
-    click.echo(f"Running {len(questions)} questions (judge={'off' if no_judge else 'on'})...\n")
+    mode = "baseline" if baseline else "regrag"
+    click.echo(f"Running {len(questions)} questions [mode={mode}, judge={'off' if no_judge else 'on'}]...\n")
 
     def progress(i, n, qid):
         click.echo(f"  [{i}/{n}] {qid}", err=True)
 
-    report = run_all(questions, run_judge=not no_judge, progress_callback=progress)
+    report = run_all(questions, run_judge=not no_judge, mode=mode, progress_callback=progress)
 
     # Write JSON report
     if out_dir is None:

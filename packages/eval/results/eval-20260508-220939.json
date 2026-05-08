@@ -1,0 +1,97 @@
+{
+  "summary": {
+    "n_questions": 3,
+    "n_errors": 0,
+    "retrieval_recall_macro": 1.0,
+    "citation_faithfulness_macro": null,
+    "refusal_accuracy": 0.6666666666666666
+  },
+  "by_persona": {
+    "compliance_analyst": {
+      "n": 1,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "refusal_accuracy": 1.0
+    },
+    "counsel": {
+      "n": 1,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "refusal_accuracy": 1.0
+    },
+    "researcher": {
+      "n": 1,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "refusal_accuracy": 0.0
+    }
+  },
+  "by_question": [
+    {
+      "id": "compliance-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 2600,
+        "synthesize_baseline": 18198
+      },
+      "answer_preview": "## Order No. 2222 Reporting and Data Requirements for DER Aggregators\n\n### Registration and Physical Parameters\n\nOrder No. 2222 requires each RTO/ISO to revise its tariff to establish information requirements for DER aggregators, but with significant flexibility. Rather than mandating specific physi...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "counsel-001",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1316,
+        "synthesize_baseline": 21358
+      },
+      "answer_preview": "# FERC's Treatment of State Opt-Out Provisions: Order 719 Through Order 2222-A\n\n## The Order 719 Baseline\n\nThe foundational opt-out framework was established in **Order No. 719**, which permitted states (RERRAs) to prohibit retail customers' demand response from being bid into RTO/ISO markets by agg...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "researcher-oos-001",
+      "persona": "researcher",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1075,
+        "synthesize_baseline": 17763
+      },
+      "answer_preview": "## FERC vs. State PUC Oversight of Distribution Utilities\n\n### Fundamental Jurisdictional Division\n\nThe Federal Power Act establishes a clear division of authority between FERC and state regulators. The federal government oversees wholesale rates and interstate commerce, while states retain authorit...",
+      "judge_notes": [],
+      "error": null
+    }
+  ]
+}
