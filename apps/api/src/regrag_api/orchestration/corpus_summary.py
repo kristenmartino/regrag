@@ -2,40 +2,61 @@
 
 Per docs/implementation-plan.md §2.6 / critique.md H5: the decomposer needs
 to know what's in the corpus before it can produce per-document sub-queries.
-This is a static summary loaded from corpus/manifest.yaml at startup; refresh
-when the manifest changes (e.g. as part of the ingest cron).
+
+Built by querying the `documents` table directly so the summary always
+reflects what's actually loaded in pgvector. No file-system dependency on
+manifest.yaml — works inside Docker, Vercel, etc. without bundling corpus
+data into the build artifact. Cached for the process lifetime; restart the
+service after corpus changes.
 """
 
 from __future__ import annotations
 
+import logging
+import os
 from functools import lru_cache
-from pathlib import Path
 
-import yaml
+import psycopg
+
+log = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)
-def load_corpus_summary(manifest_path: Path | None = None) -> str:
-    """Build a one-line-per-document summary of the corpus from manifest.yaml."""
-    if manifest_path is None:
-        # default: ~/regrag/corpus/manifest.yaml relative to this file.
-        # parents: [0]=orchestration [1]=regrag_api [2]=src [3]=api [4]=apps [5]=repo_root
-        repo_root = Path(__file__).resolve().parents[5]
-        manifest_path = repo_root / "corpus" / "manifest.yaml"
-    raw = yaml.safe_load(manifest_path.read_text())
-    docs = raw.get("documents") or []
+def load_corpus_summary() -> str:
+    """Build a one-line-per-document summary by SELECT-ing from the documents table."""
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        log.warning("corpus_summary: DATABASE_URL not set, returning placeholder")
+        return "(corpus summary unavailable — database not configured)"
+
+    try:
+        with psycopg.connect(url, connect_timeout=10) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT order_number, docket_numbers, document_type, issue_date, title
+                    FROM documents
+                    ORDER BY issue_date DESC
+                    """
+                )
+                rows = cur.fetchall()
+    except Exception as e:
+        log.error("corpus_summary: query failed: %s", e)
+        return "(corpus summary unavailable — database query failed)"
+
     lines: list[str] = []
-    for d in docs:
-        order = d.get("order_number")
-        dockets = ", ".join(d.get("docket_numbers") or [])
-        date = d.get("issue_date")
-        title = d.get("title", "(untitled)")
-        # truncate long titles
-        if len(title) > 90:
-            title = title[:87] + "..."
-        if order:
-            lines.append(f"- Order {order} ({dockets}, {date}): {title}")
+    for order_number, dockets, doc_type, issue_date, title in rows:
+        truncated = title[:87] + "..." if title and len(title) > 90 else (title or "(untitled)")
+        dockets_str = ", ".join(dockets or [])
+        if order_number:
+            lines.append(f"- Order {order_number} ({dockets_str}, {issue_date}): {truncated}")
         else:
-            doc_type = d.get("document_type", "doc")
-            lines.append(f"- [{doc_type}] {dockets} ({date}): {title}")
-    return "Corpus contents (each is a single document the system can retrieve):\n" + "\n".join(lines)
+            lines.append(f"- [{doc_type or 'doc'}] {dockets_str} ({issue_date}): {truncated}")
+
+    if not lines:
+        return "(corpus is empty — no documents loaded)"
+
+    return (
+        "Corpus contents (each is a single document the system can retrieve):\n"
+        + "\n".join(lines)
+    )
