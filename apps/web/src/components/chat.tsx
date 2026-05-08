@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,17 @@ import {
   SubQueriesPanel,
   stagesFromEvents,
 } from "@/components/pipeline";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+// Threshold above which we show the warming hint. Anything under this is
+// indistinguishable from normal latency, so we don't bother surfacing it.
+const COLD_START_HINT_THRESHOLD_MS = 1500;
+
+type WarmStatus =
+  | { kind: "warming" }
+  | { kind: "warm"; cold_start: boolean; ms: number }
+  | { kind: "failed"; reason: string };
 
 type Turn = {
   id: string;
@@ -42,7 +53,34 @@ export function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
+  const [warm, setWarm] = useState<WarmStatus>({ kind: "warming" });
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Pre-warm the Railway backend on page mount so the first query doesn't
+  // pay the cold-start tax. If the warm-up itself takes long enough to be
+  // noticeable, surface the hint so the user knows what's happening rather
+  // than thinking the demo is broken.
+  useEffect(() => {
+    if (!API_BASE) {
+      setWarm({ kind: "failed", reason: "API base URL not configured" });
+      return;
+    }
+    const t0 = performance.now();
+    const controller = new AbortController();
+    fetch(`${API_BASE}/health`, { cache: "no-store", signal: controller.signal })
+      .then((res) => {
+        const ms = performance.now() - t0;
+        setWarm(
+          res.ok
+            ? { kind: "warm", cold_start: ms > COLD_START_HINT_THRESHOLD_MS, ms }
+            : { kind: "failed", reason: `HTTP ${res.status}` },
+        );
+      })
+      .catch((e) =>
+        setWarm({ kind: "failed", reason: e instanceof Error ? e.message : String(e) }),
+      );
+    return () => controller.abort();
+  }, []);
 
   async function submit(query: string) {
     if (!query.trim() || pending) return;
@@ -112,6 +150,15 @@ export function Chat() {
 
       <ScrollArea className="flex-1">
         <div className="mx-auto max-w-5xl px-6 py-6">
+          {turns.length === 0 && warm.kind === "warming" && (
+            <WarmingBanner />
+          )}
+          {turns.length === 0 && warm.kind === "warm" && warm.cold_start && (
+            <WarmedUpBanner ms={warm.ms} />
+          )}
+          {turns.length === 0 && warm.kind === "failed" && (
+            <ApiUnavailableBanner reason={warm.reason} />
+          )}
           {turns.length === 0 ? (
             <EmptyState onPick={submit} disabled={pending} />
           ) : (
@@ -153,6 +200,43 @@ export function Chat() {
         </form>
       </div>
     </div>
+  );
+}
+
+function WarmingBanner() {
+  return (
+    <Card className="mb-6 border-amber-300/60 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/30 dark:text-amber-200">
+      <div className="flex items-start gap-2">
+        <span className="relative mt-1 inline-flex h-2 w-2 flex-shrink-0">
+          <span className="absolute inset-0 animate-ping rounded-full bg-amber-500 opacity-60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+        </span>
+        <div>
+          <div className="font-medium">Waking the demo backend…</div>
+          <p className="mt-1 leading-relaxed">
+            Railway's free tier sleeps after idle. First request typically takes
+            5–30 seconds while the container starts. Subsequent queries are fast.
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function WarmedUpBanner({ ms }: { ms: number }) {
+  return (
+    <Card className="mb-6 border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+      Backend cold-started in {(ms / 1000).toFixed(1)}s. Subsequent queries will be fast.
+    </Card>
+  );
+}
+
+function ApiUnavailableBanner({ reason }: { reason: string }) {
+  return (
+    <Card className="mb-6 border-destructive bg-destructive/10 px-4 py-3 text-xs text-destructive">
+      <div className="font-medium">Backend unreachable</div>
+      <p className="mt-1 font-mono">{reason}</p>
+    </Card>
   );
 }
 
