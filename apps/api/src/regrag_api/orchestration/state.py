@@ -51,11 +51,15 @@ class GraphState(TypedDict, total=False):
     top_cosine_sim: float | None       # used for pre-generation refusal trigger
 
     # Generation
-    draft_answer: str | None             # raw model output (last attempt) before verification
+    draft_answer: str | None             # rendered text (last attempt) before verification
+    structured_claims: list[dict] | None  # tool-output claims: {claim, chunk_id, supporting_quote}
     cited_chunk_ids: list[str] | None
     verification_result: VerificationResult | None
     final_answer: str | None
     citations_stripped: int               # count from chunk-id verifier (existence check)
+    # Quote verification (substring check against chunk text):
+    claims_dropped_for_bad_quote: int     # quote not found in cited chunk
+    claims_kept_after_quotes: int         # claims that passed quote verification
     # Inline LLM-judge stripping (Haiku per (claim, chunk) pair):
     sentences_stripped: int               # count of sentences fully removed for unsupported citations
     substantive_citations_stripped: int   # citations stripped from kept sentences
@@ -89,6 +93,9 @@ def initial_state(query: str, user_id: str | None = None) -> GraphState:
         verification_result=None,
         final_answer=None,
         citations_stripped=0,
+        structured_claims=None,
+        claims_dropped_for_bad_quote=0,
+        claims_kept_after_quotes=0,
         sentences_stripped=0,
         substantive_citations_stripped=0,
         judge_notes=None,
