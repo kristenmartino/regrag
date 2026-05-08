@@ -55,7 +55,11 @@ class GraphState(TypedDict, total=False):
     cited_chunk_ids: list[str] | None
     verification_result: VerificationResult | None
     final_answer: str | None
-    citations_stripped: int
+    citations_stripped: int               # count from chunk-id verifier (existence check)
+    # Inline LLM-judge stripping (Haiku per (claim, chunk) pair):
+    sentences_stripped: int               # count of sentences fully removed for unsupported citations
+    substantive_citations_stripped: int   # citations stripped from kept sentences
+    judge_notes: list[dict] | None        # per-pair judge output, persisted for audit
     # Audit-log capture: the synthesis system prompt as actually rendered (with chunks
     # interpolated). Truncated to ~4KB at audit-write time to keep storage bounded.
     synthesize_prompt: str | None
@@ -85,6 +89,9 @@ def initial_state(query: str, user_id: str | None = None) -> GraphState:
         verification_result=None,
         final_answer=None,
         citations_stripped=0,
+        sentences_stripped=0,
+        substantive_citations_stripped=0,
+        judge_notes=None,
         synthesize_prompt=None,
         refusal_emitted=False,
         refusal_reason=None,
