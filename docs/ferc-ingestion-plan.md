@@ -77,13 +77,13 @@ Implement the chunker as a pure function of the parsed JSON record so it can be 
 
 ## 5. Embedding Pipeline
 
-**Model:** Voyage AI `voyage-3-lite` at 512 dimensions. Same choice as Sift, which means the operational patterns (batching, rate limit handling, retry on transient failures) are already proven.
+**Model:** Voyage AI `voyage-3.5-lite` at 512 dimensions. The 3-lite predecessor was Sift's choice; 3.5-lite (released May 2025) gives equivalent cost with flexible-dimension support that preserves an upgrade path. Operational patterns (batching, rate limit handling, retry on transient failures) carry over from Sift unchanged.
 
 **Batching:** embed in batches of 128 chunks. Voyage's API tolerates larger batches but 128 is a safe default that handles the eval-set-sized corpus in a reasonable wall-clock time without fighting rate limits.
 
-**Idempotency:** key embeddings by chunk identifier and embed model version. If the chunker output changes, re-embed only the affected chunks. If the embedding model changes, re-embed the full corpus and store under a versioned namespace so old and new can coexist during evaluation.
+**Idempotency:** key embeddings by chunk content hash and embed model version. If the chunker output changes, re-embed only the chunks whose content actually changed. If the embedding model changes, re-embed the full corpus and store under a versioned namespace so old and new can coexist during evaluation.
 
-**Cost expectation:** for ~30–50 documents at maybe 30–80 chunks each, total embedding volume is ~1,500–4,000 chunks. Voyage's voyage-3-lite pricing makes this trivially cheap; cost is not a constraint at this corpus size.
+**Cost expectation:** for ~30–50 documents at maybe 30–80 chunks each, total embedding volume is ~1,500–4,000 chunks. Voyage's voyage-3.5-lite is in the free tier (200M tokens/month) at this corpus scale; cost is not a constraint.
 
 ---
 

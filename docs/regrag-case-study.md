@@ -61,7 +61,7 @@ flowchart LR
     class A,F,K io
 ```
 
-**Ingestion** pulls FERC orders from the public document library on a scheduled job, with a one-time bulk load of a curated set of recent orders to seed the corpus. **Transformation** chunks documents using a section-aware splitter that preserves order numbering, paragraph structure, and footnote references rather than the naive fixed-token chunking that would fragment regulatory citations. **Embeddings** are generated with Voyage AI's voyage-3-lite model and stored in Neon Postgres with the pgvector extension as a shared vector store.
+**Ingestion** pulls FERC orders from the public document library on a scheduled job, with a one-time bulk load of a curated set of recent orders to seed the corpus. **Transformation** chunks documents using a section-aware splitter that preserves order numbering, paragraph structure, and footnote references rather than the naive fixed-token chunking that would fragment regulatory citations. **Embeddings** are generated with Voyage AI's voyage-3.5-lite model at 512 dimensions and stored in Neon Postgres with the pgvector extension as a shared vector store.
 
 **Retrieval** uses hybrid search — vector similarity over the embedding space combined with keyword matching against docket numbers, order numbers, and statutory citations. The hybrid step matters more for regulatory corpora than for general-purpose RAG; users routinely query by exact identifiers that pure semantic search handles inconsistently.
 
@@ -168,8 +168,13 @@ None of these are research problems. They are the work that turns a demonstratio
 
 ## 9. Outcomes and Artifacts
 
-*Build in progress. Live demo, source code, and current evaluation results will be linked here when the system ships. The architecture and LangGraph workflow diagrams are inline in sections 3 and 4 above.*
+- **Live demo:** [regrag.vercel.app](https://regrag.vercel.app) — public, no auth (per §8 demo design); sample queries in the empty state. Cold start ~5–10s on first request after idle, then fast.
+- **Source code:** [github.com/kristenmartino/regrag](https://github.com/kristenmartino/regrag) — full monorepo (`apps/api` FastAPI + LangGraph, `apps/web` Next.js + shadcn/ui, `apps/ingest` corpus pipeline, `packages/eval` 28-question harness).
+- **Architecture diagram:** inline above in §3.
+- **LangGraph workflow diagram:** inline above in §4.
+- **Evaluation results:** [docs/eval-results.md](eval-results.md) — current run is 98.3% retrieval recall / 89.3% refusal accuracy / 70.3% citation faithfulness across 28 questions. Includes per-persona breakdown, latency distribution, and a "where the system fails" section.
+- **Audit log viewer:** [regrag.vercel.app/audit](https://regrag.vercel.app/audit) — every chat invocation is logged with full chunk snapshot, prompt, raw + verified response, per-stage latency. Demo-only access; production would gate this behind RBAC.
 
 ---
 
-*Designed by Kristen Martino; build in progress. The architecture and patterns in this project draw on a prior production RAG system (Sift, [siftnews.kristenmartino.ai](https://siftnews.kristenmartino.ai)), an energy-domain ML platform (GridPulse, [gridpulse.kristenmartino.ai](https://gridpulse.kristenmartino.ai)), and 10+ years of analytics and program delivery in regulated environments.*
+*Built by Kristen Martino. The architecture and patterns in this project draw on a prior production RAG system (Sift, [siftnews.kristenmartino.ai](https://siftnews.kristenmartino.ai)), an energy-domain ML platform (GridPulse, [gridpulse.kristenmartino.ai](https://gridpulse.kristenmartino.ai)), and 10+ years of analytics and program delivery in regulated environments.*
