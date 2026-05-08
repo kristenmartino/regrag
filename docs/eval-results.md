@@ -1,8 +1,12 @@
 # RegRAG Evaluation Results
 
-Latest run: **2026-05-08** against the 28-question seed set. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge).
+Latest production run: **2026-05-08** (v3) against the 28-question seed set. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge).
 
-Raw reports: [eval-20260508-184200.json](../packages/eval/results/eval-20260508-184200.json) (current) · [eval-20260507-044907.json](../packages/eval/results/eval-20260507-044907.json) (baseline, before inline judge).
+Raw reports:
+- [eval-20260508-184200.json](../packages/eval/results/eval-20260508-184200.json) — **v2** (inline Haiku judge introduced)
+- [eval-20260508-200406.json](../packages/eval/results/eval-20260508-200406.json) — **v3** (added prompt-tightening on top of v2; current production)
+- [eval-20260508-203704.json](../packages/eval/results/eval-20260508-203704.json) — **v4** (structured-output synthesis + quote verification; reverted, see "What didn't work" below)
+- [eval-20260507-044907.json](../packages/eval/results/eval-20260507-044907.json) — **v1 baseline** (chunk-id verifier only)
 
 ---
 
@@ -74,6 +78,39 @@ Three patterns surfaced repeatedly. None invalidate the architecture; all are ev
 - 13/28 (46%) routed `single_doc`, 15/28 (54%) routed `multi_doc`
 - Accuracy on the labeled subset: **17/20 = 85%**
 - Misclassifications all routed *toward* the agentic path (false-multi-doc), which costs latency + a Sonnet call but doesn't degrade answer quality
+
+## What didn't work — structured output + quote verification (v4)
+
+After landing the v3 result (91.4% CF), the obvious next move was to tighten the verification architecture: instead of relying on an LLM judge to assess substantive support, force the synthesizer to emit `(claim, chunk_id, supporting_quote)` triples via Anthropic tool use, then substring-check each quote against its chunk. By construction, citation drift toward topical chunks should become impossible — the model has to *find* a supporting phrase up front, and the phrase has to actually appear in the chunk.
+
+The hypothesis was that structural verification would beat the LLM judge. The eval said the opposite.
+
+**v4 results vs. v3:**
+
+| Metric | v3 (LLM judge) | v4 (structured + quote verify) | Δ |
+|---|---|---|---|
+| Refusal accuracy | 89.3% | 85.7% | -3.6 pp |
+| Retrieval recall | 98.3% | 98.3% | 0 |
+| Citation faithfulness | 91.4% | **84.1%** | **-7.3 pp** |
+
+Per-persona, the regression hit hardest where the gains in v3 had been largest:
+
+| Persona | v3 CF | v4 CF | Δ |
+|---|---|---|---|
+| compliance_analyst | 83.3% | 75.0% | -8.3 pp |
+| counsel | 91.2% | 90.8% | ~0 |
+| federal_staff | 93.8% | 93.3% | ~0 |
+| **researcher** | **95.3%** | **76.8%** | **-18.5 pp** |
+
+**Why structural verification lost.** The substring check is too permissive. It accepts any quote that appears anywhere in the chunk, even when the claim paraphrases beyond what the quote actually supports. The LLM judge correctly identifies the failure mode "the quote is real but the claim overreaches" — the substring check cannot. On comparative researcher questions especially, the model would find a literal phrase to cite but then make a synthesis claim the phrase didn't actually establish, and the substring check waved it through.
+
+The structural approach also dropped refusal accuracy 3.6 pp because the quote-verification regen loop pushed marginal answers into refusal territory: a draft with several weak-quote claims would trip the keep-ratio threshold, regenerate, regenerate again, and end up with a sparse-or-empty answer the system then refused.
+
+**Decision:** Revert to v3. Live demo runs on the LLM-judge path (CF 91.4%). The quote verification module ([`apps/api/src/regrag_api/verification/quotes.py`](../apps/api/src/regrag_api/verification/quotes.py)) is preserved in the repo as a documented experiment artifact rather than deleted — it might still be useful as a fast pre-filter ahead of the LLM judge in a future iteration, but on its own it doesn't beat what we already have.
+
+**Lesson.** The LLM judge is doing more sophisticated work than I'd given it credit for. Substring matching catches *fabricated* citations; understanding "this chunk discusses X but doesn't establish Y" requires the kind of judgment a calibrated LLM does well. Future effort should go toward making the LLM judge cheaper or faster, not replacing it with a structural check.
+
+---
 
 ## What the eval does not measure
 
