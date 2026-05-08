@@ -14,10 +14,16 @@ from .retrieval.identifiers import extract_identifiers
 
 
 def _load_env():
-    repo_root = Path(__file__).resolve().parents[4]
-    env_path = repo_root / ".env"
-    if env_path.exists():
-        load_dotenv(env_path, override=True)
+    """Local-dev convenience: load .env from repo root if present. Tolerates
+    container environments where the path is shorter and env vars come from
+    the platform."""
+    try:
+        repo_root = Path(__file__).resolve().parents[4]
+        env_path = repo_root / ".env"
+        if env_path.exists():
+            load_dotenv(env_path, override=True)
+    except (IndexError, OSError):
+        pass
 
 
 @click.command()

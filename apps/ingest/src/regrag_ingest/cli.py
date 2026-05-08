@@ -33,10 +33,15 @@ def cli(verbose: int, env_file: Path | None):
         datefmt="%H:%M:%S",
     )
     if env_file is None:
-        # default: ~/regrag/.env (repo root, shared between apps/ingest and apps/api)
-        repo_root = Path(__file__).resolve().parents[4]
-        env_file = repo_root / ".env"
-    if env_file.exists():
+        # default: ~/regrag/.env (repo root, shared between apps/ingest and apps/api).
+        # Wrapped in try/except so the CLI tolerates being run inside a container
+        # where the path is shorter (env vars come from the platform there).
+        try:
+            repo_root = Path(__file__).resolve().parents[4]
+            env_file = repo_root / ".env"
+        except (IndexError, OSError):
+            env_file = None
+    if env_file is not None and env_file.exists():
         load_dotenv(env_file, override=True)
 
 

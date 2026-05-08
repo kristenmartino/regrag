@@ -14,13 +14,22 @@ from dotenv import load_dotenv
 from .runner import load_eval_set, report_to_dict, run_all
 
 
-def _repo_root() -> Path:
-    # parents: [0]=regrag_eval [1]=src [2]=eval [3]=packages [4]=regrag (repo root)
-    return Path(__file__).resolve().parents[4]
+def _repo_root() -> Path | None:
+    # parents: [0]=regrag_eval [1]=src [2]=eval [3]=packages [4]=regrag (repo root).
+    # Returns None inside containers where the path is shorter (the eval CLI is
+    # local-only — eval invokes the production graph via the regrag-api package,
+    # but the CLI itself runs from a dev shell).
+    try:
+        return Path(__file__).resolve().parents[4]
+    except (IndexError, OSError):
+        return None
 
 
 def _load_env():
-    env_path = _repo_root() / ".env"
+    root = _repo_root()
+    if root is None:
+        return
+    env_path = root / ".env"
     if env_path.exists():
         load_dotenv(env_path, override=True)
 
@@ -30,7 +39,9 @@ def _default_eval_set_path() -> Path:
 
 
 def _default_output_dir() -> Path:
-    return _repo_root() / "packages" / "eval" / "results"
+    root = _repo_root()
+    base = root if root is not None else Path.cwd()
+    return base / "packages" / "eval" / "results"
 
 
 @click.group()
