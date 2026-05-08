@@ -31,7 +31,12 @@ log = logging.getLogger(__name__)
 
 BASELINE_K = 10  # match the order of magnitude of the agentic path's per-query retrieval
 
-BASELINE_SYSTEM_PROMPT = """\
+# Two baseline variants, selectable via env var BASELINE_PROMPT_VARIANT:
+#   "thin"   — minimal instruction; tests "what does vanilla RAG produce out of the box"
+#   "matched" — same citation discipline as production prompt, just no agentic / no verification;
+#              isolates JUST the architectural contribution
+
+THIN_PROMPT = """\
 You are answering questions about FERC regulatory orders. Use the chunks below to answer.
 
 Cite chunks using their chunk_id in [[chunk_id]] format after sentences supported by a chunk. Copy chunk_ids verbatim from the chunk headers.
@@ -39,6 +44,32 @@ Cite chunks using their chunk_id in [[chunk_id]] format after sentences supporte
 CHUNKS:
 {chunks_block}
 """
+
+MATCHED_PROMPT = """\
+You are answering questions about FERC regulatory orders. Use ONLY the chunks below; do not draw on outside knowledge or training data.
+
+CITATION DISCIPLINE — read this carefully:
+
+Before you write any sentence with a citation, find the specific phrase in the cited chunk that asserts what you're claiming. If the chunk discusses the topic but does not make the specific assertion you want to make — DO NOT MAKE THE CLAIM. Drop it. A shorter answer with grounded claims is much better than a longer answer with paraphrased-from-context claims.
+
+Cite every substantive claim using the chunk_id in double square brackets, exactly as shown in the chunk's header. Place the citation at the end of the sentence the chunk supports.
+
+CITATION FORMAT — copy the chunk_id verbatim, including all colons and digits:
+  Correct:   [[20200917-3084:c0111]]
+  WRONG:     [[Order 2222]]
+  WRONG:     [[20200917-3084]]              ← must include the cNNNN suffix
+
+If the chunks do NOT address the question, say so briefly rather than inventing details.
+
+CHUNKS:
+{chunks_block}
+"""
+
+BASELINE_PROMPT = (
+    MATCHED_PROMPT
+    if os.environ.get("BASELINE_PROMPT_VARIANT", "matched") == "matched"
+    else THIN_PROMPT
+)
 
 
 def run_baseline(query: str, *, user_id: str | None = None, k: int = BASELINE_K) -> GraphState:
@@ -67,7 +98,7 @@ def run_baseline(query: str, *, user_id: str | None = None, k: int = BASELINE_K)
         f"{(c.get('chunk_text') or '').strip()}"
         for c in chunks
     )
-    system = BASELINE_SYSTEM_PROMPT.format(chunks_block=chunks_block)
+    system = BASELINE_PROMPT.format(chunks_block=chunks_block)
 
     client = get_client()
     response = client.messages.create(

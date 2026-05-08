@@ -1,0 +1,1368 @@
+{
+  "summary": {
+    "n_questions": 28,
+    "n_errors": 0,
+    "retrieval_recall_macro": 0.9833333333333334,
+    "citation_faithfulness_macro": 0.05,
+    "refusal_accuracy": 0.7142857142857143
+  },
+  "by_persona": {
+    "compliance_analyst": {
+      "n": 7,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.2,
+      "refusal_accuracy": 0.7142857142857143
+    },
+    "counsel": {
+      "n": 7,
+      "retrieval_recall": 0.9333333333333333,
+      "citation_faithfulness": 0.0,
+      "refusal_accuracy": 0.7142857142857143
+    },
+    "federal_staff": {
+      "n": 7,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "refusal_accuracy": 0.7142857142857143
+    },
+    "researcher": {
+      "n": 7,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "refusal_accuracy": 0.7142857142857143
+    }
+  },
+  "by_question": [
+    {
+      "id": "compliance-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1414,
+        "synthesize_baseline": 22102
+      },
+      "answer_preview": "# Order No. 2222 Reporting and Data Requirements for DER Aggregators\n\n## Registration and Physical Parameters\n\nOrder No. 2222 requires each RTO/ISO to revise its tariff to establish information requirements for DER aggregators, but with important modifications from the original NOPR proposal. Rather...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-002",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1212,
+        "synthesize_baseline": 4162
+      },
+      "answer_preview": "Based on the chunks provided, Order No. 841 required each RTO/ISO to submit a compliance filing **within six months of the date the final rule is published in the Federal Register**, with **12 months from the date of the compliance filing** allowed for implementation of the proposed reforms to becom...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "The chunk explicitly states the six-month compliance filing deadline and 12-month implementation period from the compliance filing date, matching the claim exactly."
+        },
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Same chunk as pair 0, which explicitly supports the claim about six-month compliance filing and 12-month implementation deadlines."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "The chunk explicitly references Order No. 841 with an effective date within 90 days of Federal Register publication and compliance deadline within 270 days of publication, directly supporting the claim."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-003",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 995,
+        "synthesize_baseline": 8135
+      },
+      "answer_preview": "## Treatment of Small Utility Customer Aggregations Under Order No. 2222\n\nUnder Order No. 2222, RTOs/ISOs must apply a **small utility opt-in mechanism** when dealing with aggregations that include customers of small utilities, defined as those that distributed **4 million MWh or less** in the previ...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify the specific claim about RTOs/ISOs not accepting bids and RERRA opt-in mechanism"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify the 4 million MWh threshold or RERRA opt-in rationale"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify any claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-004",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1135,
+        "synthesize_baseline": 8302
+      },
+      "answer_preview": "## Information Sharing Requirements for DER Aggregators Under Order No. 2222-A\n\n### Core Clarification Granted\n\nIn Order No. 2222-A, the Commission granted clarification that **specific information regarding a distributed energy resource that is provided by a distribution utility to an RTO/ISO as pa...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify the claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify the claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify the claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify the claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify the claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-005",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1395,
+        "synthesize_baseline": 13973
+      },
+      "answer_preview": "## Order 841's Metering and Telemetry Requirements for Electric Storage Resources\n\n### Core Approach: Flexibility Over Prescription\n\nOrder 841 (Final Rule) takes a notably **flexible approach** rather than imposing rigid telemetry requirements. The Commission provides each RTO/ISO the flexibility to...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "compliance-oos-001",
+      "persona": "compliance_analyst",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1189,
+        "synthesize_baseline": 6218
+      },
+      "answer_preview": "Based on the provided chunks, FERC does not have direct residential rooftop solar net-metering requirements. In fact, the chunks suggest that **net metering programs generally fall outside of FERC's jurisdiction**.\n\nSpecifically, the Commission clarified that:\n\n- A distributed energy resource aggreg...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "compliance-oos-002",
+      "persona": "compliance_analyst",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1095,
+        "synthesize_baseline": 7282
+      },
+      "answer_preview": "Based on the chunks provided, there is only limited information about cybersecurity standards for investor-owned utilities under FERC.\n\nThe available chunks mention **NERC reliability standards** and **Critical Infrastructure Protection (CIP) Standards** in passing:\n\n- Order No. 845 addressed requir...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "counsel-001",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1034,
+        "synthesize_baseline": 22992
+      },
+      "answer_preview": "## FERC's Treatment of State Opt-Out Provisions: Order 719 Through Order 2222-A\n\n### Origins: The Order No. 719 Framework\n\nThe foundational opt-out framework was established in **Order No. 719**, which allowed Relevant Electric Retail Regulatory Authorities (RERRAs) to prohibit retail customers' dem...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot evaluate support"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-002",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1013,
+        "synthesize_baseline": 16446
+      },
+      "answer_preview": "## Comparison of Metering and Telemetry Requirements: Orders 841 and 2222\n\n### Order 841 (Electric Storage Resources)\n\nOrder 841 takes a **flexible, RTO/ISO-driven approach** to telemetry for electric storage resources. The Commission provides each RTO/ISO the flexibility to propose its own telemetr...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 6,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 7,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 7,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-003",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1095,
+        "synthesize_baseline": 8309
+      },
+      "answer_preview": "Based on the provided chunks, I can address aspects of both orders, though the chunks provide more detail on Order No. 845 than Order No. 2222.\n\n## Order No. 845 \u2013 Large Generator Interconnection Reforms\n\nOrder No. 845 focused specifically on revising the **pro forma Large Generator Interconnection ...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not retrieved; cannot verify claim about Order 845 revising LGIP and LGIA for facilities over 20 MW"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not retrieved; cannot verify claim about improving certainty reforms in Order 845"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not retrieved; cannot verify claim about promoting informed decisions reforms in Order 845"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not retrieved; cannot verify claim about enhancing the process reforms in Order 845"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk not retrieved; cannot verify claim about Order 2222 addressing wholesale market participation for DER aggregations"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-004",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1001,
+        "synthesize_baseline": 13844
+      },
+      "answer_preview": "## Order No. 2222's Treatment of Homogeneous vs. Heterogeneous DER Aggregations\n\n### The Core Distinction\n\nOrder No. 2222 draws a fundamental distinction between aggregations composed **solely of demand response resources** versus **heterogeneous aggregations** that mix different resource types.\n\nFo...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify support"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-005",
+      "persona": "counsel",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 0.6666666666666666,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1043,
+        "synthesize_baseline": 4782
+      },
+      "answer_preview": "Based on the chunks provided, there is only a brief reference to the D.C. Circuit upholding Order No. 841, mentioned in passing in the context of a different argument. Specifically, Public Interest Organizations are noted as contending that \"in upholding Order No. 841, the United States Court of App...",
+      "judge_notes": [
+        {
+          "missing_keywords": [
+            "upheld"
+          ]
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "The cited chunk was not retrieved and its content is unavailable, so it cannot be verified whether it supports the specific claim about the D.C. Circuit upholding Order 841 or the grounds for that decision."
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "counsel-oos-001",
+      "persona": "counsel",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1136,
+        "synthesize_baseline": 4455
+      },
+      "answer_preview": "Based on the chunks provided, I cannot answer your question about FERC's regulation of natural gas pipeline construction permits.\n\nThe chunks provided deal exclusively with **generator interconnection procedures**, specifically topics such as:\n- The \"option to build\" provisions under pro forma LGIA ...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "counsel-oos-002",
+      "persona": "counsel",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1117,
+        "synthesize_baseline": 5486
+      },
+      "answer_preview": "Based on the provided chunks, there is **no direct information** about FERC's position on EV charging infrastructure deployment incentives.\n\nThe chunks do contain some tangentially related content:\n\n- **Electric Vehicle R&D Group** is mentioned as arguing that electric storage resources should be al...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "fedstaff-001",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1007,
+        "synthesize_baseline": 7691
+      },
+      "answer_preview": "Based on the available chunks, I can provide a limited summary of RTO/ISO concerns raised in the Order 2222 NOPR proceeding (which addressed electric storage resources and distributed energy resource aggregations).\n\n## Major Issues Raised by RTO Commenters in the Order 2222 NOPR Proceeding\n\n### Juri...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-002",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1117,
+        "synthesize_baseline": 7314
+      },
+      "answer_preview": "Based on the provided chunks, there are several concerns that state regulatory authorities raised during the Order No. 841 rulemaking:\n\n1. **Retail Rate Adjustments**: State commissions and load-serving entities (LSEs) expressed concern that they might need to revise retail tariffs for customers par...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-003",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1740,
+        "synthesize_baseline": 9726
+      },
+      "answer_preview": "Based on the chunks provided, I can identify some stakeholders who requested rehearing of Order No. 2222 and their concerns, though the chunks don't provide a comprehensive list.\n\n## Stakeholders Requesting Rehearing of Order No. 2222\n\n### Kansas Commission\nThe Kansas Commission requested clarificat...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify support"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify support"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-004",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1069,
+        "synthesize_baseline": 15602
+      },
+      "answer_preview": "## Principal Proposals in the RM21-17 ANOPR on Transmission Planning\n\nBased on the available chunks from the July 15, 2021 ANOPR (Docket No. RM21-17-000), the Commission sought comment on several major areas of potential reform:\n\n### 1. Long-Term Scenario Planning for Future Generation\nThe ANOPR que...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 6,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 6,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 6,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set; cannot verify claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-005",
+      "persona": "federal_staff",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1039,
+        "synthesize_baseline": 8019
+      },
+      "answer_preview": "Based on the chunks provided, under Order 745 (FERC's Final Rule in Docket No. RM10-17-000), RTOs/ISOs must pay the full Locational Marginal Price (LMP) for demand response resources under the following conditions:\n\n## When Full LMP Must Be Paid\n\nRTOs and ISOs must pay demand response resources the ...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not in retrieved set, cannot verify"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fedstaff-oos-001",
+      "persona": "federal_staff",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1116,
+        "synthesize_baseline": 3081
+      },
+      "answer_preview": "The chunks provided do not contain any information about FERC's annual budget appropriation for fiscal year 2025. The chunks focus on topics such as interconnection procedures, information collection burdens, tariff filings, and regulatory orders related to generator interconnection \u2014 none of which ...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "fedstaff-oos-002",
+      "persona": "federal_staff",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 967,
+        "synthesize_baseline": 8933
+      },
+      "answer_preview": "Based on the provided chunks, there is **insufficient information** to fully describe the FERC Office of Enforcement's investigation procedures for tariff violations. The chunks provided do not directly address this topic.\n\nHowever, the chunks do contain a few limited references to enforcement-relat...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "researcher-001",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1322,
+        "synthesize_baseline": 25968
+      },
+      "answer_preview": "## Comparing FERC/State Jurisdictional Boundaries in Orders 745, 841, and 2222\n\n### Common Jurisdictional Foundation\n\nAll three orders rest on the same core legal principle: FERC holds **exclusive jurisdiction over wholesale market rules and participation criteria**, while states retain authority ov...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support for EPSA upholding Order 745 or state opt-out characterization"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify support for the claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify NARUC court holding on Order 841"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify NARUC exclusive authority principle"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify the claim"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify Order 2222 exclusive jurisdiction over participation criteria"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify RERRA limitation claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify jurisdictional carve-out for DER interconnections or Commissioner criticisms"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify the claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify the claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify the claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify the claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-002",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1483,
+        "synthesize_baseline": 18423
+      },
+      "answer_preview": "## Relationship Between Order 2222 and Order 841 Frameworks\n\n### Jurisdictional Foundation\n\nOrder 2222 explicitly builds on the jurisdictional precedent established by Order 841. The Commission notes that \"the final rule builds off the DC Circuit Court's recent ruling on Order No. 841, in which the ...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim content"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-003",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1510,
+        "synthesize_baseline": 27268
+      },
+      "answer_preview": "# FERC's Evolving Stance on Demand Response: Order 745 through Order 2222\n\n## 1. Foundational Jurisdiction (Order 745 Era)\n\nFERC established early on that it possessed jurisdiction over demand response in organized wholesale energy markets \"because it directly affects wholesale rates.\" [[chunk_id=20...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 4,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        },
+        {
+          "claim_idx": 5,
+          "score": 0,
+          "reason": "Chunk not in retrieved set; cannot verify claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-004",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1185,
+        "synthesize_baseline": 13714
+      },
+      "answer_preview": "## Relationship Between Order No. 845 and Order No. 845-A\n\n### Order No. 845 (The Original Final Rule)\n\nOrder No. 845 was the foundational rulemaking that adopted ten different reforms in three general categories to improve the generator interconnection process [[chunk_id=20190221-3057:c0003 | acces...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify claim"
+        },
+        {
+          "claim_idx": 3,
+          "score": 0,
+          "reason": "Cited chunk not in retrieved set, cannot verify claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-005",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 0.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1159,
+        "synthesize_baseline": 10025
+      },
+      "answer_preview": "Based on the chunks provided, Order No. 2222 does not establish specific named participation models itself, but rather **requires RTOs/ISOs to establish their own participation models** for DER aggregations. Here is what the chunks reveal about this framework:\n\n## What Order No. 2222 Requires\n\nRTOs/...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot verify claim"
+        },
+        {
+          "claim_idx": 0,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot verify claim"
+        },
+        {
+          "claim_idx": 1,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot verify claim"
+        },
+        {
+          "claim_idx": 2,
+          "score": 0,
+          "reason": "chunk_id not in retrieved set - cannot verify claim"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-oos-001",
+      "persona": "researcher",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 963,
+        "synthesize_baseline": 18649
+      },
+      "answer_preview": "## FERC vs. State PUC Oversight of Distribution Utilities\n\n### Basic Division of Authority\n\nThe Federal Power Act establishes a foundational division between federal and state regulatory authority. The federal government is responsible for ensuring just and reasonable wholesale rates and prohibiting...",
+      "judge_notes": [],
+      "error": null
+    },
+    {
+      "id": "researcher-oos-002",
+      "persona": "researcher",
+      "expected_behavior": "refuse",
+      "classification": "baseline",
+      "refusal_emitted": false,
+      "refusal_correct": false,
+      "retrieval_recall": null,
+      "citation_faithfulness": null,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 10,
+      "timings_ms": {
+        "retrieve_baseline": 1026,
+        "synthesize_baseline": 8741
+      },
+      "answer_preview": "Based on the provided chunks, here is what can be gleaned about the impact of FERC orders on retail consumer electricity prices:\n\n## Potential Benefits\n\nFERC orders aim to improve wholesale market competition, which can indirectly benefit retail consumers. Effective wholesale competition provides **...",
+      "judge_notes": [],
+      "error": null
+    }
+  ]
+}

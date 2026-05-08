@@ -79,6 +79,33 @@ Three patterns surfaced repeatedly. None invalidate the architecture; all are ev
 - Accuracy on the labeled subset: **17/20 = 85%**
 - Misclassifications all routed *toward* the agentic path (false-multi-doc), which costs latency + a Sonnet call but doesn't degrade answer quality
 
+## Baseline comparison — what does the architecture actually buy?
+
+The 91.4% citation faithfulness number is impressive in isolation, but a senior reader will ask: vs. what? To answer that honestly, we ran two baselines through the same eval harness — both keep voyage-3.5-lite + Neon pgvector + claude-sonnet-4-6, but progressively strip out RegRAG's contributions.
+
+| Setup | Refusal acc | Retrieval recall | Citation faithfulness |
+|---|---|---|---|
+| **Thin baseline** — pure vector top-10 + plain Sonnet, minimal prompt | 71.4% | 98.3% | **5.0%** |
+| **Matched baseline** — same retrieval + Sonnet, but with RegRAG's prompt discipline (citation format + "find the supporting phrase or drop the claim") | 71.4% | 98.3% | **81.1%** |
+| **RegRAG (full)** — agentic decomposition + hybrid retrieval + chunk-id verifier + Haiku substantive judge | **89.3%** | 98.3% | **91.2%** |
+
+This decomposes the gain into two attributable layers:
+
+**Prompt discipline → +76 pp CF** (5.0% → 81.1%). The single largest lever, with zero code and no extra LLM calls. Without the citation-format instruction and the "drop the claim if you can't find a supporting phrase" rule, the thin baseline emits citations only intermittently and in inconsistent formats; the LLM-as-judge can't even find them, hence the 5% floor. Add the prompt discipline and citations become parseable, formatted correctly, and largely defensible.
+
+**Agentic + verification → +10 pp CF AND +18 pp refusal accuracy** (81.1% → 91.2% CF, 71.4% → 89.3% refusal). Smaller than the headline number suggested but real. The agentic decomposition (classify → decompose → retrieve_parallel → synthesize) and the runtime substantive-support judge cost ~5x the per-query latency and ~$0.005 more in API spend. What you get for that:
+- Tighter citations (the substantive judge strips paraphrase-beyond-support claims that the prompt discipline can't catch)
+- A working refusal mechanism — without the judge, the system answers OOS questions instead of declining (researcher-OOS in particular)
+- Per-document coverage on comparison queries (decomposition issues separate sub-queries per document, which single-pass retrieval misses)
+
+**The honest framing.** The architecture's contribution to *citation faithfulness alone* is 10 pp. Most CF gains come from prompt engineering, which is cheap. But the architecture's contribution to *refusal accuracy* is 18 pp — and refusal accuracy is what makes the system usable in a regulated domain where "I don't know" beats "here is a confident but unsupported answer." The agentic + verification layers earn their cost on the refusal axis more than the citation axis.
+
+Retrieval recall is the same across all three (98.3%) — pure vector retrieval finds the relevant chunks just as well as the hybrid + identifier-floor approach. The hybrid retrieval's value is on the *long tail* of identifier-heavy queries that the eval set doesn't fully exercise; this is a known eval limitation, not an architecture limitation.
+
+Raw reports: [thin baseline](../packages/eval/results/eval-20260508-221716.json) · [matched baseline](../packages/eval/results/eval-20260508-230246.json) · [full RegRAG](../packages/eval/results/eval-20260508-184200.json).
+
+---
+
 ## What didn't work — structured output + quote verification (v4)
 
 After landing the v3 result (91.4% CF), the obvious next move was to tighten the verification architecture: instead of relying on an LLM judge to assess substantive support, force the synthesizer to emit `(claim, chunk_id, supporting_quote)` triples via Anthropic tool use, then substring-check each quote against its chunk. By construction, citation drift toward topical chunks should become impossible — the model has to *find* a supporting phrase up front, and the phrase has to actually appear in the chunk.
