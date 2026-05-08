@@ -72,6 +72,14 @@ def verify(state: GraphState) -> dict:
     if sub.should_regenerate and regen_count < 2:
         log.info("substantive judge: high strip rate → regenerate")
         update["regeneration_count"] = regen_count + 1
+        # Override the verification_result action so the graph routing edge
+        # ('regenerate_or_finalize') sees a regen signal. Without this, the
+        # action from step 1 (which finalized) wins and the graph ends instead
+        # of looping back to synthesize.
+        from dataclasses import replace
+        update["verification_result"] = replace(
+            result, action="regenerate", notes=f"substantive judge: {sub.sentences_stripped}/{len(sub.judge_notes) or 1} sentences stripped"
+        )
         # final_answer stays unset; graph routes back to synthesize
         return update
 

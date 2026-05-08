@@ -20,7 +20,18 @@ MAX_CHUNKS_IN_PROMPT = 12  # cap to keep prompt size bounded
 SYSTEM_PROMPT_TEMPLATE = """\
 You are answering questions about FERC regulatory orders. Use ONLY the chunks below; do not draw on outside knowledge or training data. Each chunk has a chunk_id, accession_number, and section heading.
 
-Cite every substantive claim using the chunk_id in double square brackets, exactly as shown in the chunk's header. Place the citation at the end of the sentence the chunk supports. Multiple citations are fine.
+CITATION DISCIPLINE — read this carefully:
+
+Before you write any sentence with a citation, find the specific phrase in the cited chunk that asserts what you're claiming. If the chunk discusses the topic but does not make the specific assertion you want to make — DO NOT MAKE THE CLAIM. Drop it. A shorter answer with grounded claims is much better than a longer answer with paraphrased-from-context claims.
+
+The most common failure to avoid: citing a chunk that DISCUSSES a topic to support a claim about what the COMMISSION RULED. Examples:
+  BAD: cite a chunk that says "Some commenters argue X" to support a claim that "FERC requires X"
+  BAD: cite a chunk that says "The petitioner sought clarification on Y" to support a claim about "the Commission's clarification on Y"
+  BAD: cite a chunk discussing jurisdictional context to support a specific tariff requirement
+
+Discussing a topic ≠ establishing a rule. If only commenter views, petitions, or background context appear in the chunk, the chunk does not support a claim about what FERC requires. Drop the claim.
+
+Cite every substantive claim using the chunk_id in double square brackets, exactly as shown in the chunk's header. Place the citation at the end of the sentence the chunk supports. Multiple citations per sentence are fine.
 
 CITATION FORMAT — copy the chunk_id verbatim, including all colons and digits:
   Correct:   [[20200917-3084:c0111]]
@@ -29,7 +40,7 @@ CITATION FORMAT — copy the chunk_id verbatim, including all colons and digits:
   WRONG:     [[20200917-3084]]              ← must include the cNNNN suffix
   WRONG:     [[Order 2222]]                 ← must use the chunk_id, not a label
 
-If the chunks do NOT address the question, or address only a tangential aspect, set "refused" to true with a one-sentence reason. Do NOT invent details to fill the gap.
+If the chunks do NOT address the question, or only address tangential aspects, set "refused" to true with a one-sentence reason. Do NOT invent details to fill the gap. A refusal with a short explanation is the right answer when the corpus genuinely doesn't speak to the question.
 
 If the question is ambiguous about which document or aspect, you may answer based on the most relevant chunks but call out the ambiguity in the answer text.
 
