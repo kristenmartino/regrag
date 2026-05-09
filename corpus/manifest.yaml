@@ -99,6 +99,89 @@ documents:
     pdf_size_bytes: 162922
     notes: "Short companion to Order 2222; useful for testing chunker on small docs and for summary-style eval questions"
 
+  # ───────────── Tier-2 corpus expansion (2026-05-08) — major historic + recent landmarks ─────────────
+  # Added to broaden the question space reviewers can probe. Same URL discovery
+  # strategy as the original seed: Google + HEAD checks against ferc.gov/sites/default/files/.
+
+  - order_number: "1000"
+    accession_number: "20110721-3061"  # verify on first ingest
+    docket_numbers: ["RM10-23-000"]
+    document_type: "final_rule"
+    issue_date: "2011-07-21"
+    title: "Transmission Planning and Cost Allocation by Transmission Owning and Operating Public Utilities"
+    ferc_cite: "136 FERC ¶ 61,051"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/Order-1000.pdf"
+    pdf_size_bytes: 1546599
+    notes: "Foundational transmission planning rule; precursor to RM21-17 ANOPR and Order 1920. Essential for evolution-of-FERC-policy questions."
+
+  - order_number: "2003"
+    accession_number: "20030723-3060"  # verify on first ingest
+    docket_numbers: ["RM02-1-000"]
+    document_type: "final_rule"
+    issue_date: "2003-07-24"
+    title: "Standardization of Generator Interconnection Agreements and Procedures"
+    ferc_cite: "104 FERC ¶ 61,103"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/Order-2003.pdf"
+    pdf_size_bytes: 931556
+    notes: "Foundational LGIA/LGIP rule; predecessor to Orders 845 and 2023. Anchor for interconnection-evolution questions."
+
+  - order_number: "1920"
+    accession_number: "20240513-3061"  # verify on first ingest
+    docket_numbers: ["RM21-17-000"]
+    document_type: "final_rule"
+    issue_date: "2024-05-13"
+    title: "Building for the Future Through Electric Regional Transmission Planning and Cost Allocation"
+    ferc_cite: "187 FERC ¶ 61,068"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2024-05/RM21-17-000.pdf"
+    pdf_size_bytes: 7280161
+    notes: "The 2024 transmission planning final rule that built on the RM21-17 ANOPR. Pairs with the existing ANOPR for an end-to-end rulemaking trajectory."
+
+  - order_number: "2023"
+    accession_number: "20230728-3060"  # verify on first ingest
+    docket_numbers: ["RM22-14-000"]
+    document_type: "final_rule"
+    issue_date: "2023-07-28"
+    title: "Improvements to Generator Interconnection Procedures and Agreements"
+    ferc_cite: "184 FERC ¶ 61,054"
+    # Sourced from a third-party law-firm mirror (wrightlaw.com); FERC's own
+    # /sites/default/files/ doesn't expose this PDF at a derivable URL. Verified
+    # by file-size match (1500-page rule = ~9.5 MB) and PDF metadata structure.
+    pdf_url: "https://www.wrightlaw.com/wp-content/uploads/2024/01/Order-No-2023-Improvements-to-Generator-Interconnection-Procedures-and-Agreements.pdf"
+    pdf_size_bytes: 9452043
+    notes: "Major 2023 interconnection reform; RM22-14. Third-party-mirrored because not on FERC.gov directly. Pairs with Order 2023-A for the rehearing arc."
+
+  - order_number: "2023-A"
+    accession_number: "20240321-3057"  # verify on first ingest
+    docket_numbers: ["RM22-14-001"]
+    document_type: "rehearing_order"
+    issue_date: "2024-03-21"
+    title: "Improvements to Generator Interconnection Procedures and Agreements — Order on Rehearing"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2024-03/RM22-14-001.pdf"
+    pdf_size_bytes: 4869295
+    notes: "Rehearing of Order 2023; addresses petitions for clarification + reconsideration."
+
+  - order_number: "872"
+    accession_number: "20200716-3061"  # verify on first ingest
+    docket_numbers: ["RM19-15-000", "AD16-16-000"]
+    document_type: "final_rule"
+    issue_date: "2020-07-16"
+    title: "Qualifying Facility Rates and Requirements; Implementation Issues Under PURPA"
+    ferc_cite: "172 FERC ¶ 61,041"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/RM20-15-000.pdf"
+    pdf_size_bytes: 279013
+    notes: "PURPA modernization for qualifying facilities (small DERs). Adjacent to Orders 745 + 2222 for distributed-resource policy questions."
+
+  - order_number: "825"
+    accession_number: "20160616-3060"  # verify on first ingest
+    docket_numbers: ["RM15-24-000"]
+    document_type: "final_rule"
+    issue_date: "2016-06-16"
+    title: "Settlement Intervals and Shortage Pricing in Markets Operated by Regional Transmission Organizations and Independent System Operators"
+    ferc_cite: "155 FERC ¶ 61,276"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-05/settlement825.pdf"
+    pdf_size_bytes: 649473
+    notes: "Settlement-interval and shortage-pricing reforms; foundational for storage + DER market participation that 841 + 2222 build on."
+
 # ───────────── TODO: discover PDF URLs for these landmark orders ─────────────
 # Search shows these exist but the /sites/default/files/ filename is not derivable
 # from the docket number. Need to either: (a) find via Google for "filetype:pdf"
