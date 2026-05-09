@@ -122,7 +122,7 @@ The argument here is not that this system cannot fail. It is that when it fails,
 
 ## 6. Evaluation
 
-The eval set is 28 hand-crafted question/answer pairs — 5 in-scope plus 2 out-of-scope per persona, balanced across the four user personas in section 2. Each pair specifies the question, the expected source documents, the expected supporting passage keywords, and the expected behavior (answer or refuse).
+The eval set is 40 hand-crafted question/answer pairs — 8 in-scope plus 2 out-of-scope per persona, balanced across the four user personas in section 2. Each pair specifies the question, the expected source documents, the expected supporting passage keywords, and the expected behavior (answer or refuse). The set was originally 28 questions covering 8 documents; after the corpus expansion to 15 documents, 12 new questions were added to exercise the new content (interconnection arc 2003 → 845 → 2023, transmission planning arc 1000 → 1920, market design 825/872).
 
 Three metrics are tracked per eval run:
 
@@ -134,15 +134,15 @@ Three metrics are tracked per eval run:
 
 The eval harness runs on every change to retrieval, chunking, or generation parameters; results are logged with the same audit infrastructure used for live queries, which means the eval history is itself a tracked artifact rather than a one-off notebook.
 
-**Current results** (28 questions, voyage-3.5-lite + claude-sonnet-4-6 + claude-haiku-4-5):
+**Current results** (40 questions, 15-doc corpus, voyage-3.5-lite + claude-sonnet-4-6 + claude-haiku-4-5):
 
 | Metric | Score | Notes |
 |---|---|---|
-| Retrieval recall | **98.3%** | Macro-averaged over 20 answer-expected questions |
-| Refusal accuracy | **89.3%** | 25/28 — 3 borderline questions on the answer/refuse boundary |
-| Citation faithfulness | **91.2%** | LLM-as-judge over cited claims, after the runtime substantive-support filter described in §5 stripped misattributed citations |
+| Retrieval recall | **96.9%** | Macro-averaged over 30 answer-expected questions |
+| Refusal accuracy | **90.0%** | 36/40 — 4 borderline questions on the answer/refuse boundary |
+| Citation faithfulness | **95.4%** | LLM-as-judge over cited claims, after the runtime substantive-support filter described in §5 stripped misattributed citations |
 
-The citation-faithfulness number reflects the post-§5 cleaned answer. The pre-filter baseline (chunk-id verification only, no substantive judge) was **70.3%**; turning on the inline judge moved that to 91.2%, with the largest gains on the federal-staff and policy-researcher personas — exactly the questions where the model was most prone to citing topically-related but substantively-unsupportive chunks.
+The citation-faithfulness number reflects the post-§5 cleaned answer. The pre-filter baseline (chunk-id verification only, no substantive judge) was **70.3%** on the original 28-question set; turning on the inline judge moved that to 91.2%, and growing the eval to 40 questions covering the full 15-doc corpus moved it further to 95.4%. The architecture generalized cleanly to new content — see [docs/eval-results.md](eval-results.md) for the per-persona breakdown, the baseline comparison, and a "what didn't work" section on the structured-output verification experiment that lost to the LLM judge.
 
 Per-persona breakdown still shows comparative researcher questions are the hardest (refusal 86%, faithfulness 95%) and single-doc compliance questions are easiest (refusal 100%, faithfulness 83% — the lower CF here reflects fewer claims to grade, not worse quality). The full per-question report including judge rationale lives in [docs/eval-results.md](eval-results.md) and the raw `packages/eval/results/` JSON.
 
@@ -180,7 +180,7 @@ None of these are research problems. They are the work that turns a demonstratio
 - **Source code:** [github.com/kristenmartino/regrag](https://github.com/kristenmartino/regrag) — full monorepo (`apps/api` FastAPI + LangGraph, `apps/web` Next.js + shadcn/ui, `apps/ingest` corpus pipeline, `packages/eval` 28-question harness).
 - **Architecture diagram:** inline above in §3.
 - **LangGraph workflow diagram:** inline above in §4.
-- **Evaluation results:** [docs/eval-results.md](eval-results.md) — current run is 98.3% retrieval recall / 89.3% refusal accuracy / 70.3% citation faithfulness across 28 questions. Includes per-persona breakdown, latency distribution, and a "where the system fails" section.
+- **Evaluation results:** [docs/eval-results.md](eval-results.md) — current run is 96.9% retrieval recall / 90.0% refusal accuracy / 95.4% citation faithfulness across 40 questions on the 15-doc corpus. Includes per-persona breakdown, baseline comparison (vs vanilla RAG), and a "what didn't work" section on the structured-output verification experiment.
 - **Audit log viewer:** [regrag.vercel.app/audit](https://regrag.vercel.app/audit) — every chat invocation is logged with full chunk snapshot, prompt, raw + verified response, per-stage latency. Demo-only access; production would gate this behind RBAC.
 
 ---

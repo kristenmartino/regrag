@@ -208,3 +208,101 @@ questions:
     expected_behavior: refuse
     query: "What is the impact of FERC orders on retail consumer electricity prices?"
     expected_refusal_reason: "Retail price impact studies are not in the corpus."
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # Tier-2 expansion (2026-05-08): 12 new questions exercising the corpus growth
+  # to 15 docs. Targets the new content (Orders 1920, 2023, 2023-A, 1000, 2003,
+  # 825) and the rulemaking arcs the expanded corpus enables.
+  #
+  # Skipped: Order 872. Its PDF is in the Federal Register format that the
+  # current chunker collapses to ~2 substantive sections — questions about it
+  # would measure parser failure, not RegRAG quality.
+  # ═══════════════════════════════════════════════════════════════════════════════
+
+  # ─────────── Compliance analyst — single-doc, new corpus ───────────
+  - id: compliance-006
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "What does Order 825 require regarding settlement intervals in RTO/ISO markets?"
+    expected_documents: ["20160616-3060"]
+    expected_passages_keywords: ["five-minute", "settlement", "RTO/ISO"]
+
+  - id: compliance-007
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "Under Order 2023, how does the cluster study process work for generator interconnection requests?"
+    expected_documents: ["20230728-3060", "20240321-3057"]
+    expected_passages_keywords: ["cluster study", "interconnection", "transmission provider"]
+
+  - id: compliance-008
+    persona: compliance_analyst
+    expected_behavior: answer
+    query: "What does Order 1920 require regarding state participation in long-term regional transmission planning?"
+    expected_documents: ["20240513-3061"]
+    expected_passages_keywords: ["state", "regional transmission planning", "long-term"]
+
+  # ─────────── Counsel — interpretive, multi-doc, new corpus ───────────
+  - id: counsel-006
+    persona: counsel
+    expected_behavior: answer
+    query: "How did FERC's approach to generator interconnection studies evolve from Order 2003's serial process to Order 2023's cluster study approach?"
+    expected_documents: ["20030723-3060", "20230728-3060"]
+    expected_passages_keywords: ["interconnection study", "cluster", "serial"]
+
+  - id: counsel-007
+    persona: counsel
+    expected_behavior: answer
+    query: "What are the key changes Order 2023-A made on rehearing of Order 2023's cluster network upgrade cost allocation?"
+    expected_documents: ["20240321-3057"]
+    expected_passages_keywords: ["cluster network upgrade", "cost allocation", "rehearing"]
+
+  - id: counsel-008
+    persona: counsel
+    expected_behavior: answer
+    query: "How does Order 1920 change the regional transmission planning requirements first established in Order 1000?"
+    expected_documents: ["20110721-3061", "20240513-3061"]
+    expected_passages_keywords: ["regional transmission planning", "Order No. 1000", "long-term"]
+
+  # ─────────── Federal staff — procedural / commenter, new corpus ───────────
+  - id: fedstaff-006
+    persona: federal_staff
+    expected_behavior: answer
+    query: "What concerns did transmission providers raise about deadlines in Order 2003's optional interconnection studies?"
+    expected_documents: ["20030723-3060"]
+    expected_passages_keywords: ["optional interconnection", "deadline", "comments"]
+
+  - id: fedstaff-007
+    persona: federal_staff
+    expected_behavior: answer
+    query: "What were the principal NOPR proposals leading to Order 1920 on long-term regional transmission planning?"
+    expected_documents: ["20240513-3061"]
+    expected_passages_keywords: ["NOPR", "long-term", "transmission planning"]
+
+  - id: fedstaff-008
+    persona: federal_staff
+    expected_behavior: answer
+    query: "What concerns did commenters raise about five-minute settlement intervals in Order 825?"
+    expected_documents: ["20160616-3060"]
+    expected_passages_keywords: ["five-minute", "settlement", "comments"]
+
+  # ─────────── Policy researcher — comparative, evolution, new corpus ───────────
+  - id: researcher-006
+    persona: researcher
+    expected_behavior: answer
+    query: "Trace the evolution of generator interconnection rules from Order 2003 through Order 845 to Order 2023."
+    expected_documents: ["20030723-3060", "20180419-3093", "20230728-3060"]
+    expected_passages_keywords: ["interconnection", "LGIA", "transmission provider"]
+
+  - id: researcher-007
+    persona: researcher
+    expected_behavior: answer
+    query: "How does Order 1920 build upon the federal right of first refusal removed in Order 1000?"
+    expected_documents: ["20110721-3061", "20240513-3061"]
+    expected_passages_keywords: ["right of first refusal", "regional transmission", "incumbent"]
+
+  - id: researcher-008
+    persona: researcher
+    expected_behavior: answer
+    query: "How do the market design reforms in Order 825 (settlement intervals) relate to the participation models for storage in Order 841 and DERs in Order 2222?"
+    expected_documents: ["20160616-3060", "20180228-3066", "20200917-3084"]
+    expected_passages_keywords: ["settlement", "participation", "wholesale market"]

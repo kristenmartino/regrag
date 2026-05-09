@@ -1,0 +1,171 @@
+{
+  "summary": {
+    "n_questions": 2,
+    "n_errors": 0,
+    "retrieval_recall_macro": 1.0,
+    "citation_faithfulness_macro": 1.0,
+    "refusal_accuracy": 1.0
+  },
+  "by_persona": {
+    "compliance_analyst": {
+      "n": 1,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "refusal_accuracy": 1.0
+    },
+    "researcher": {
+      "n": 1,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "refusal_accuracy": 1.0
+    }
+  },
+  "by_question": [
+    {
+      "id": "compliance-006",
+      "persona": "compliance_analyst",
+      "expected_behavior": "answer",
+      "classification": "single_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 0,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 8,
+      "timings_ms": {
+        "classify": 695,
+        "retrieve_single": 3228,
+        "synthesize": 5908,
+        "verify": 3580
+      },
+      "answer_preview": "**Energy transactions**: Settling energy transactions in its real-time markets at the same time interval it dispatches energy [[20160616-3060:c0001]] [[20160616-3060:c0000]]\n\n2. **Operating reserves transactions**: Settling operating reserves transactions in its real-time markets at the same time in...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Both chunks explicitly state requirement to settle energy transactions at the same time interval as dispatch"
+        },
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Chunk c0000 explicitly states the requirement to settle energy transactions at the same time interval it dispatches energy"
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk c0001 explicitly states requirement to settle operating reserves transactions at the same time interval it prices operating reserves"
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk c0000 explicitly states the requirement to settle operating reserves transactions at the same time interval it prices operating reserves"
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "Chunk c0001 states the intertie transaction settlement requirement and c0010 confirms the 'not just and reasonable and unduly discriminatory' finding"
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "Chunk c0051 explicitly states requirement to settle intertie transactions in the same time interval they are scheduled"
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "Chunk c0010 explicitly states the 'not just and reasonable and unduly discriminatory and preferential' conclusion and the directive to align settlement and dispatch intervals"
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "Chunk c0045 paragraph 73 explicitly states that all operating reserve products with market-based prices are subject to the settlement interval reform"
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "Chunk c0000 states the reforms 'will align prices with resource' (dispatch instructions) though truncated, supports the alignment rationale"
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "Chunk c0013 explicitly states that resources dispatched during high-priced periods would receive higher prices rather than hourly average, reducing uplift payments"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "researcher-006",
+      "persona": "researcher",
+      "expected_behavior": "answer",
+      "classification": "multi_doc",
+      "refusal_emitted": false,
+      "refusal_correct": true,
+      "retrieval_recall": 1.0,
+      "citation_faithfulness": 1.0,
+      "citations_stripped": 0,
+      "sentences_stripped": 6,
+      "substantive_citations_stripped": 0,
+      "regeneration_count": 0,
+      "n_chunks_retrieved": 34,
+      "timings_ms": {
+        "classify": 771,
+        "decompose": 2985,
+        "retrieve_parallel": 16755,
+        "synthesize": 25044,
+        "verify": 7633
+      },
+      "answer_preview": "2003, the Commission addressed interconnection issues on a case-by-case basis through filings under section 205 of the FPA [[20180419-3093:c0007]]. The Commission recognized a \"pressing need for a single set of procedures for jurisdictional Transmission Providers and a single, uniformly applicable i...",
+      "judge_notes": [
+        {
+          "claim_idx": 0,
+          "score": 1,
+          "reason": "Chunk explicitly states the Commission addressed interconnection issues on a case-by-case basis through filings under section 205 of the FPA prior to Order No. 2003."
+        },
+        {
+          "claim_idx": 1,
+          "score": 1,
+          "reason": "Chunk explicitly quotes the 'pressing need for a single set of procedures for jurisdictional Transmission Providers and a single, uniformly applicable interconnection agreement for Large Generators' language."
+        },
+        {
+          "claim_idx": 2,
+          "score": 1,
+          "reason": "Chunk explicitly states Order No. 2003 required public utilities to file standard procedures and a standard agreement for generating facilities greater than 20 MW, adopted the pro forma LGIP and LGIA, and required modification of OATTs."
+        },
+        {
+          "claim_idx": 3,
+          "score": 1,
+          "reason": "The cited chunk explicitly states the Commission expected changes would prevent undue discrimination, preserve reliability, increase energy supply, and lower wholesale prices."
+        },
+        {
+          "claim_idx": 4,
+          "score": 1,
+          "reason": "Chunk explicitly states 'Although the issuance of Order No. 2003 was a significant step in minimizing undue discrimination in the generator interconnection process, some concerns with the process persisted, while some new concerns came to light.'"
+        },
+        {
+          "claim_idx": 5,
+          "score": 1,
+          "reason": "Chunk explicitly states Order No. 845 revised the pro forma LGIP and LGIA to improve certainty for interconnection customers, promote more informed interconnection decisions, and enhance the interconnection process."
+        },
+        {
+          "claim_idx": 6,
+          "score": 1,
+          "reason": "Chunk explicitly describes the first category of reforms in Order No. 845: removing the limitation on exercising the option to build and requiring dispute resolution procedures, matching the claim."
+        },
+        {
+          "claim_idx": 7,
+          "score": 1,
+          "reason": "Chunk explicitly states that growth of new resources and their differing characteristics created new challenges, causing large interconnection queue backlogs, uncertainty in cost and timing, increasing costs for consumers, and reliability issues."
+        },
+        {
+          "claim_idx": 8,
+          "score": 1,
+          "reason": "Chunk explicitly states Order No. 2023 required all public utility transmission providers to adopt revised pro forma LGIP, LGIA, SGIP, and SGIA to ensure reliable, efficient, transparent, and timely interconnection and prevent undue discrimination."
+        }
+      ],
+      "error": null
+    }
+  ]
+}

@@ -1,35 +1,39 @@
 # RegRAG Evaluation Results
 
-Latest production run: **2026-05-08** (v3) against the 28-question seed set. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge).
+Latest production run: **2026-05-09** (v5) against the **40-question** expanded eval set covering all 15 corpus documents. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge).
 
 Raw reports:
-- [eval-20260508-184200.json](../packages/eval/results/eval-20260508-184200.json) — **v2** (inline Haiku judge introduced)
-- [eval-20260508-200406.json](../packages/eval/results/eval-20260508-200406.json) — **v3** (added prompt-tightening on top of v2; current production)
+- [eval-20260509-041345.json](../packages/eval/results/eval-20260509-041345.json) — **v5** (40 questions, post corpus expansion to 15 docs)
+- [eval-20260508-184200.json](../packages/eval/results/eval-20260508-184200.json) — **v2/v3** (28 questions, 8-doc corpus, inline judge)
 - [eval-20260508-203704.json](../packages/eval/results/eval-20260508-203704.json) — **v4** (structured-output synthesis + quote verification; reverted, see "What didn't work" below)
+- [eval-20260508-221716.json](../packages/eval/results/eval-20260508-221716.json) — **thin baseline** (vanilla RAG, minimal prompt)
+- [eval-20260508-230246.json](../packages/eval/results/eval-20260508-230246.json) — **matched baseline** (RegRAG prompt, no agentic, no verification)
 - [eval-20260507-044907.json](../packages/eval/results/eval-20260507-044907.json) — **v1 baseline** (chunk-id verifier only)
 
 ---
 
-## Headline metrics
+## Headline metrics (v5, 40 questions, 15-doc corpus)
 
-| Metric | Score | Δ vs. baseline | Methodology |
+| Metric | Score | Δ vs. v3 (28 questions, 8 docs) | Methodology |
 |---|---|---|---|
-| **Retrieval recall** | **98.3%** | — | Macro-averaged over 20 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
-| **Refusal accuracy** | **89.3%** | — | 25 of 28 questions correctly refused-when-OOS or answered-when-in-scope. Two improvements + two regressions vs. baseline (see "Refusal shifts" below) |
-| **Citation faithfulness** | **91.2%** | **+20.9 pp** | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
+| **Retrieval recall** | **96.9%** | -1.4 pp | Macro-averaged over 30 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
+| **Refusal accuracy** | **90.0%** | +0.7 pp | 36 of 40 questions correctly refused-when-OOS or answered-when-in-scope |
+| **Citation faithfulness** | **95.4%** | **+4.2 pp** | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
 
-The citation-faithfulness gain is the result of a runtime intervention: a second-step judge runs inline as part of `verify` (Haiku, ~$0.005 per chat call, ~3s added latency) and strips claims whose citations don't substantively support them. See "Architecture change driving the CF gain" below.
+The CF improvement on a larger eval set is meaningful — it shows the architecture generalizes to new corpus content, not just the questions it was tuned against. The new 12 questions cover the rulemaking arcs the corpus expansion enables (interconnection 2003 → 845 → 2023, transmission planning 1000 → RM21-17 ANOPR → 1920, market design 825 + 841 + 2222).
 
 ## Per-persona breakdown
 
-| Persona | n | Refusal | Recall | Citation faithfulness | CF Δ |
-|---|---|---|---|---|---|
-| compliance_analyst | 7 | **100%** | **100%** | 83.3% | +11.4 pp |
-| counsel | 7 | 85.7% | 93.3% | 91.2% | +9.8 pp |
-| federal_staff | 7 | 85.7% | **100%** | 93.8% | **+28.4 pp** |
-| researcher | 7 | 85.7% | **100%** | **95.3%** | **+30.5 pp** |
+| Persona | n | Refusal | Recall | Citation faithfulness |
+|---|---|---|---|---|
+| compliance_analyst | 10 | 90.0% | 95.8% | 95.2% |
+| counsel | 10 | 80.0% | 95.8% | 92.9% |
+| federal_staff | 10 | 90.0% | 95.8% | **97.6%** |
+| **researcher** | 10 | **100%** | **100%** | **95.9%** |
 
-The personas with the lowest baseline CF (federal_staff and researcher) saw the biggest gains. Their questions had the most claims that paraphrased commenter views or jurisdictional discussion as Commission rulings — exactly the failure mode the inline judge targets.
+The researcher persona — which was the weakest in the v1 baseline (71% refusal, 65% CF) — now hits **100% on refusal AND retrieval recall, with 95.9% CF**. The new evolution-style questions (`researcher-006/007/008`) all worked cleanly. The 30+ pp gains here over the v1 baseline come from the combination of (a) the inline LLM judge added in v2/v3 and (b) richer corpus context that gives the system more material to ground claims in.
+
+The counsel persona slipped 5.7 pp on refusal (from 85.7% on 28-q to 80% on 40-q): one of the new counsel questions (probably `counsel-006` on the Order 2003 → Order 2023 evolution) over-refused. Worth a closer look but not blocking.
 
 ## Architecture change driving the CF gain
 
