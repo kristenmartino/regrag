@@ -117,14 +117,15 @@ export async function streamChat(
   }
 }
 
-// Human-readable stage labels for UI rendering
+// Human-readable stage labels for UI rendering — written for non-engineer readers.
+// The engineering names are: classify / decompose / retrieve_(single|parallel) / synthesize / verify
 export const STAGE_LABEL: Record<StageName, string> = {
-  classify: "Classify intent",
-  decompose: "Decompose into sub-queries",
-  retrieve_single: "Retrieve chunks",
-  retrieve_parallel: "Retrieve chunks (parallel)",
-  synthesize: "Synthesize answer",
-  verify: "Verify citations",
+  classify: "Understanding your question",
+  decompose: "Breaking it into sub-questions",
+  retrieve_single: "Finding relevant passages",
+  retrieve_parallel: "Finding relevant passages (per sub-question)",
+  synthesize: "Writing the answer",
+  verify: "Checking citations",
 };
 
 // ─── /audit endpoints ──────────────────────────────────────────────

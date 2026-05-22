@@ -251,11 +251,13 @@ function EmptyState({
     <div className="mx-auto max-w-2xl text-center">
       <h2 className="text-2xl font-semibold tracking-tight">Ask about FERC orders</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        The corpus contains Orders 2222, 841, 745, 845/845-A, plus the
-        RM21-17 transmission planning ANOPR. Single-document lookups go
-        through Haiku; multi-document synthesis questions get decomposed and
-        answered with Sonnet. Each stage of the pipeline streams live.
+        The corpus is <strong>15 FERC orders spanning 2003–2024</strong>: interconnection (Orders 2003, 845, 845-A, 2023, 2023-A), transmission planning (Orders 1000, 1920 + RM21-17 ANOPR), distributed energy and storage (Orders 745, 841, 2222, 2222-A, 872), and market mechanics (Order 825). Single-document lookups go through Haiku; multi-document synthesis questions get decomposed and answered with Sonnet. Each stage of the pipeline streams live.
       </p>
+      <Card className="mt-4 border-amber-300/60 bg-amber-50 px-4 py-3 text-left text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/30 dark:text-amber-200">
+        <strong>Demo only.</strong> Not legal advice and not for use in regulatory filings.
+        Outputs may be inaccurate — every claim should be verified against the cited source
+        before any external use. See the <a className="underline" href="https://github.com/kristenmartino/regrag/blob/main/docs/eval-results.md" target="_blank" rel="noreferrer">eval results</a> for measured citation faithfulness (95.4%) and known failure modes.
+      </Card>
       <div className="mt-6 grid gap-2 text-left">
         {SAMPLE_QUERIES.map((q) => (
           <Button

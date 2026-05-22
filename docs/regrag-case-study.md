@@ -198,7 +198,7 @@ None of these are research problems. They are the work that turns a demonstratio
 ## 9. Outcomes and Artifacts
 
 - **Live demo:** [regrag.vercel.app](https://regrag.vercel.app) — public, no auth (per §8 demo design); sample queries in the empty state. Cold start ~5–10s on first request after idle, then fast.
-- **Source code:** [github.com/kristenmartino/regrag](https://github.com/kristenmartino/regrag) — full monorepo (`apps/api` FastAPI + LangGraph, `apps/web` Next.js + shadcn/ui, `apps/ingest` corpus pipeline, `packages/eval` 28-question harness).
+- **Source code:** [github.com/kristenmartino/regrag](https://github.com/kristenmartino/regrag) — full monorepo (`apps/api` FastAPI + LangGraph, `apps/web` Next.js + shadcn/ui, `apps/ingest` corpus pipeline, `packages/eval` 40-question harness + baselines).
 - **Architecture diagram:** inline above in §3.
 - **LangGraph workflow diagram:** inline above in §4.
 - **Evaluation results:** [docs/eval-results.md](eval-results.md) — current run is 96.9% retrieval recall / 90.0% refusal accuracy / 95.4% citation faithfulness across 40 questions on the 15-doc corpus. Includes per-persona breakdown, baseline comparison (vs vanilla RAG), and a "what didn't work" section on the structured-output verification experiment.

@@ -19,13 +19,14 @@ from typing import Any
 
 import psycopg
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from .orchestration.graph import run as run_graph
 from .orchestration.graph import run_streaming
+from .rate_limit import audit_limit, chat_limit
 
 # Local-dev convenience: load .env from the repo root if present. In production
 # (Railway, Vercel, etc.) env vars come from the platform; this no-ops there.
@@ -93,12 +94,14 @@ class ChatResponse(BaseModel):
     timings_ms: dict[str, int]
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health() -> dict[str, str]:
+    """Health check. Supports both GET (returns body) and HEAD (returns 200
+    with no body) so uptime monitors that default to HEAD don't get 405s."""
     return {"status": "ok"}
 
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat", response_model=ChatResponse, dependencies=[Depends(chat_limit)])
 def chat(req: ChatRequest) -> ChatResponse:
     log.info("/chat query=%r user_id=%r", req.query, req.user_id)
     try:
@@ -177,7 +180,7 @@ def _get_audit_conn() -> psycopg.Connection:
     return psycopg.connect(url)
 
 
-@app.get("/audit", response_model=list[AuditRowSummary])
+@app.get("/audit", response_model=list[AuditRowSummary], dependencies=[Depends(audit_limit)])
 def audit_list(
     limit: int = Query(default=50, ge=1, le=200),
     user_id: str | None = Query(default=None, description="Filter by user_id (e.g. 'eval-runner')"),
@@ -222,7 +225,7 @@ def audit_list(
     ]
 
 
-@app.get("/audit/{query_id}", response_model=AuditRowDetail)
+@app.get("/audit/{query_id}", response_model=AuditRowDetail, dependencies=[Depends(audit_limit)])
 def audit_detail(query_id: str):
     """Full record for one query_log row."""
     with _get_audit_conn() as conn:
@@ -263,7 +266,7 @@ def audit_detail(query_id: str):
     )
 
 
-@app.post("/chat/stream")
+@app.post("/chat/stream", dependencies=[Depends(chat_limit)])
 def chat_stream(req: ChatRequest):
     """SSE stream of stage events as the LangGraph executes.
 

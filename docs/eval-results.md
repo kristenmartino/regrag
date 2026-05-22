@@ -14,13 +14,15 @@ Raw reports:
 
 ## Headline metrics (v5, 40 questions, 15-doc corpus)
 
-| Metric | Score | Δ vs. v3 (28 questions, 8 docs) | Methodology |
-|---|---|---|---|
-| **Retrieval recall** | **96.9%** | -1.4 pp | Macro-averaged over 30 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
-| **Refusal accuracy** | **90.0%** | +0.7 pp | 36 of 40 questions correctly refused-when-OOS or answered-when-in-scope |
-| **Citation faithfulness** | **95.4%** | **+4.2 pp** | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
+| Metric | Score | Methodology |
+|---|---|---|
+| **Retrieval recall** | **96.9%** | Macro-averaged over 30 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
+| **Refusal accuracy** | **90.0%** | 36 of 40 questions correctly refused-when-OOS or answered-when-in-scope |
+| **Citation faithfulness** | **95.4%** | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
 
-The CF improvement on a larger eval set is meaningful — it shows the architecture generalizes to new corpus content, not just the questions it was tuned against. The new 12 questions cover the rulemaking arcs the corpus expansion enables (interconnection 2003 → 845 → 2023, transmission planning 1000 → RM21-17 ANOPR → 1920, market design 825 + 841 + 2222).
+For reference, v3 on the original 28-question set hit 89.3% refusal / 98.3% recall / 91.2% CF. **These are not directly comparable to v5** — different eval sets, different corpora — but the order-of-magnitude consistency (both runs ~90% refusal, both >90% CF after the inline judge) suggests the architecture generalizes rather than overfits to the original test bank.
+
+**Important methodological caveat for the headline numbers:** all 40 questions were authored by the same person who designed the system, so the eval exercises queries the system is biased toward handling well. The numbers should be read as "this is what the system does on author-curated questions"; real-user query distributions will look different. See "What the eval does not measure" below for the full list of confounds.
 
 ## Per-persona breakdown
 
