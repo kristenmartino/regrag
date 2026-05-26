@@ -75,6 +75,18 @@ class AggregateReport:
     retrieval_recall_macro: float | None
     citation_faithfulness_macro: float | None
     refusal_accuracy: float
+    # Refusal as a binary classifier (treating "refused" as the positive class):
+    # precision = of refusals, how many were correct (TP / (TP + FP))
+    # recall    = of should-refuse questions, how many did we refuse (TP / (TP + FN))
+    # A system that refuses everything scores 100% recall but precision = base rate.
+    # A system that never refuses scores 0% recall but undefined precision.
+    # Splitting these out makes the eval meaningful when class balance is uneven
+    # (review finding #17, 2026-05-22).
+    refusal_precision: float | None  # None if no refusals were emitted
+    refusal_recall: float | None     # None if no questions expected refusal
+    n_should_refuse: int             # ground-truth positive count
+    n_did_refuse: int                # predicted positive count
+    n_refuse_tp: int                 # correctly refused
     by_persona: dict[str, dict[str, float]]
     by_question: list[QuestionResult]
 
@@ -98,6 +110,14 @@ def aggregate(results: Iterable[QuestionResult]) -> AggregateReport:
     refusal_vals = [r.refusal_correct for r in results
                     if r.refusal_correct is not None and r.error is None]
     refusal_acc = sum(1 for v in refusal_vals if v) / len(refusal_vals) if refusal_vals else 0.0
+
+    # Refusal precision/recall — treat "refused" as the positive class.
+    scoreable = [r for r in results if r.error is None and r.expected_behavior in ("refuse", "answer")]
+    n_should_refuse = sum(1 for r in scoreable if r.expected_behavior == "refuse")
+    n_did_refuse = sum(1 for r in scoreable if r.refusal_emitted)
+    n_refuse_tp = sum(1 for r in scoreable if r.refusal_emitted and r.expected_behavior == "refuse")
+    refusal_precision = (n_refuse_tp / n_did_refuse) if n_did_refuse else None
+    refusal_recall = (n_refuse_tp / n_should_refuse) if n_should_refuse else None
 
     # Per-persona breakdown
     by_persona: dict[str, dict[str, float]] = defaultdict(lambda: {"n": 0, "rr": 0.0, "rr_n": 0,
@@ -134,6 +154,11 @@ def aggregate(results: Iterable[QuestionResult]) -> AggregateReport:
         retrieval_recall_macro=rr_macro,
         citation_faithfulness_macro=cf_macro,
         refusal_accuracy=refusal_acc,
+        refusal_precision=refusal_precision,
+        refusal_recall=refusal_recall,
+        n_should_refuse=n_should_refuse,
+        n_did_refuse=n_did_refuse,
+        n_refuse_tp=n_refuse_tp,
         by_persona=by_persona_clean,
         by_question=results,
     )

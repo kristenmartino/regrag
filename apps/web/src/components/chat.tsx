@@ -256,7 +256,8 @@ function EmptyState({
       <Card className="mt-4 border-amber-300/60 bg-amber-50 px-4 py-3 text-left text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/30 dark:text-amber-200">
         <strong>Demo only.</strong> Not legal advice and not for use in regulatory filings.
         Outputs may be inaccurate — every claim should be verified against the cited source
-        before any external use. See the <a className="underline" href="https://github.com/kristenmartino/regrag/blob/main/docs/eval-results.md" target="_blank" rel="noreferrer">eval results</a> for measured citation faithfulness (95.4%) and known failure modes.
+        before any external use. <strong>Do not paste confidential client information</strong> —
+        queries are logged in plaintext for audit. See the <a className="underline" href="https://github.com/kristenmartino/regrag/blob/main/docs/eval-results.md" target="_blank" rel="noreferrer">eval results</a> for measured citation faithfulness (95.4%) and known failure modes.
       </Card>
       <div className="mt-6 grid gap-2 text-left">
         {SAMPLE_QUERIES.map((q) => (

@@ -89,7 +89,12 @@ documents:
     notes: "ANOPR that preceded Order 1920; supports rulemaking-trajectory questions"
 
   - order_number: null  # fact sheet, not an order
-    accession_number: null
+    # Synthetic accession; FERC didn't assign one to the fact-sheet companion (it's a
+    # press handout, not a filed document). Format `factsheet-{docket}` is unique
+    # across the corpus and reads cleanly in audit logs. (review finding #11, 2026-05-22)
+    # Note: existing DB rows from the original ingest are still keyed on `url-15ba54edbab1`;
+    # a reingest of this entry will produce new rows with the synthetic accession.
+    accession_number: "factsheet-RM18-9"
     docket_numbers: ["RM18-9-000"]
     document_type: "fact_sheet"
     issue_date: "2020-09-17"

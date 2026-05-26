@@ -18,7 +18,11 @@ Raw reports:
 |---|---|---|
 | **Retrieval recall** | **96.9%** | Macro-averaged over 30 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
 | **Refusal accuracy** | **90.0%** | 36 of 40 questions correctly refused-when-OOS or answered-when-in-scope |
+| **Refusal precision** | **70.0%** | Of 10 refusals, 7 were correct (3 false positives on should-have-answered questions) |
+| **Refusal recall** | **87.5%** | Of 8 should-refuse questions, 7 were refused (1 false negative — a borderline OOS question got a hedged answer) |
 | **Citation faithfulness** | **95.4%** | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
+
+The precision/recall split (added in review pass #17) is more honest than the headline accuracy. The two baselines below both score ~71% refusal accuracy not because they correctly refuse OOS questions — they don't refuse anything ever — but because they correctly answer the 30 should-answer questions, which makes the binary accuracy look respectable. Splitting precision/recall exposes that.
 
 For reference, v3 on the original 28-question set hit 89.3% refusal / 98.3% recall / 91.2% CF. **These are not directly comparable to v5** — different eval sets, different corpora — but the order-of-magnitude consistency (both runs ~90% refusal, both >90% CF after the inline judge) suggests the architecture generalizes rather than overfits to the original test bank.
 
@@ -89,11 +93,13 @@ Three patterns surfaced repeatedly. None invalidate the architecture; all are ev
 
 The 91.4% citation faithfulness number is impressive in isolation, but a senior reader will ask: vs. what? To answer that honestly, we ran two baselines through the same eval harness — both keep voyage-3.5-lite + Neon pgvector + claude-sonnet-4-6, but progressively strip out RegRAG's contributions.
 
-| Setup | Refusal acc | Retrieval recall | Citation faithfulness |
-|---|---|---|---|
-| **Thin baseline** — pure vector top-10 + plain Sonnet, minimal prompt | 71.4% | 98.3% | **5.0%** |
-| **Matched baseline** — same retrieval + Sonnet, but with RegRAG's prompt discipline (citation format + "find the supporting phrase or drop the claim") | 71.4% | 98.3% | **81.1%** |
-| **RegRAG (full)** — agentic decomposition + hybrid retrieval + chunk-id verifier + Haiku substantive judge | **89.3%** | 98.3% | **91.2%** |
+| Setup | Refusal acc | Refusal P / R | Retrieval recall | Citation faithfulness |
+|---|---|---|---|---|
+| **Thin baseline** — pure vector top-10 + plain Sonnet, minimal prompt | 71.4% | — / **0%** | 98.3% | **5.0%** |
+| **Matched baseline** — same retrieval + Sonnet, but with RegRAG's prompt discipline (citation format + "find the supporting phrase or drop the claim") | 71.4% | — / **0%** | 98.3% | **81.1%** |
+| **RegRAG (full)** — agentic decomposition + hybrid retrieval + chunk-id verifier + Haiku substantive judge | **89.3%** | **77.8% / 87.5%** | 98.3% | **91.2%** |
+
+The "—" in the Refusal P/R column for the baselines means precision is undefined — they emitted zero refusals across all 28 questions, so there's nothing to compute precision against. Both baselines correctly answered the 20 should-answer questions (giving them ~71% accuracy on the binary refusal metric) but never declined a single should-refuse question (0% recall). The RegRAG architecture is what gives the system a working refusal mechanism at all.
 
 This decomposes the gain into two attributable layers:
 

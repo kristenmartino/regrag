@@ -19,7 +19,7 @@ MAX_CHUNKS_IN_PROMPT = 12  # cap to keep prompt size bounded
 
 SYSTEM_PROMPT_TEMPLATE = """\
 You are answering questions about FERC regulatory orders. Use ONLY the chunks below; do not draw on outside knowledge or training data. Each chunk has a chunk_id, accession_number, and section heading.
-
+{anchor_note}
 CITATION DISCIPLINE — read this carefully:
 
 Before you write any sentence with a citation, find the specific phrase in the cited chunk that asserts what you're claiming. If the chunk discusses the topic but does not make the specific assertion you want to make — DO NOT MAKE THE CLAIM. Drop it. A shorter answer with grounded claims is much better than a longer answer with paraphrased-from-context claims.
@@ -82,14 +82,46 @@ def synthesize(state: GraphState) -> dict:
             "chunk_ids that appear verbatim in the CHUNKS section."
         )
 
-    system = SYSTEM_PROMPT_TEMPLATE.format(chunks_block=chunks_block, regen_note=regen_note)
-    client = get_client()
-    response = client.messages.create(
-        model=SYNTHESIS_MODEL,
-        max_tokens=2048,
-        system=system,
-        messages=[{"role": "user", "content": state["query"]}],
+    anchor_note = _anchor_note(
+        state.get("named_orders") or [],
+        state.get("anchored_accessions") or [],
+        chunks_for_prompt,
     )
+
+    system = SYSTEM_PROMPT_TEMPLATE.format(
+        chunks_block=chunks_block, regen_note=regen_note, anchor_note=anchor_note
+    )
+    client = get_client()
+    try:
+        response = client.messages.create(
+            model=SYNTHESIS_MODEL,
+            max_tokens=2048,
+            system=system,
+            messages=[{"role": "user", "content": state["query"]}],
+        )
+    except Exception as e:
+        # Anthropic outage, rate-limit, network error, etc. Don't crash the graph;
+        # surface a soft refusal so the user sees a graceful message and the
+        # frontend can render its standard refusal UI. The exception type and
+        # message are logged for ops triage.
+        log.warning(
+            "synthesize: Anthropic call failed (%s: %s) — emitting soft refusal",
+            type(e).__name__, e,
+        )
+        elapsed_ms = int((time.perf_counter() - t0) * 1000)
+        timings = dict(state.get("timings", {}))
+        timings["synthesize"] = timings.get("synthesize", 0) + elapsed_ms
+        return {
+            "draft_answer": "",
+            "synthesize_prompt": system,
+            "refusal_emitted": True,
+            "refusal_reason": "llm_unavailable",
+            "final_answer": (
+                "The synthesis model is temporarily unavailable. "
+                "Please try again in a moment."
+            ),
+            "timings": timings,
+        }
     text = response.content[0].text
     try:
         parsed = parse_json_response(text)
@@ -149,3 +181,44 @@ def _format_chunks_for_prompt(chunks: list[dict]) -> str:
             f"{c['chunk_text'].strip()}\n"
         )
     return "\n".join(lines)
+
+
+def _anchor_note(
+    named_orders: list[str], anchored_accessions: list[str], chunks: list[dict]
+) -> str:
+    """Build a prompt fragment telling the model to prefer same-accession citations
+    when the user named a specific order. Empty string when not applicable.
+
+    Only emits the note when:
+      - the query named one or more orders, AND
+      - at least one chunk in the prompt has an accession matching that order.
+    Otherwise the note is misleading (nothing to prefer) or pointless.
+    """
+    if not named_orders or not anchored_accessions:
+        return ""
+    accession_set = set(anchored_accessions)
+    matching_chunks = [c for c in chunks if c.get("accession_number") in accession_set]
+    if not matching_chunks:
+        return ""
+    orders_str = ", ".join(f"Order {o}" for o in named_orders)
+    acc_str = ", ".join(sorted(accession_set))
+    return (
+        f"\nSCOPE — read this BEFORE the citation discipline section below:\n"
+        f"The user asked specifically about {orders_str}. The canonical document(s) for "
+        f"the named order(s) have accession_number in [{acc_str}].\n"
+        f"\nFor any factual claim ABOUT the named order(s):\n"
+        f"  • You MUST cite a chunk whose accession_number is in [{acc_str}].\n"
+        f"  • A chunk from a DIFFERENT accession that merely *mentions* or *discusses* the "
+        f"named order does NOT support a claim about what the named order says or requires. "
+        f"Citing such a chunk is a misattribution error.\n"
+        f"  • Example of the error to avoid: the user asks 'what does Order 841 require for X?' "
+        f"and you cite a chunk from Order 845-A (different accession) that mentions Order 841 in passing. "
+        f"That is wrong even if 845-A's text seems topically relevant.\n"
+        f"  • If no chunk from [{acc_str}] supports the claim, do not substitute a chunk from another "
+        f"accession — instead, REFUSE the question or scope the answer narrowly to what the in-scope "
+        f"chunks actually say. Set refused=true and explain that the corpus chunks for the named "
+        f"order don't address the specific question.\n"
+        f"\nYou may still cite chunks from other accessions for claims about OTHER orders or for "
+        f"genuine cross-references (e.g. 'Order 2222 builds on Order 841 [[chunk from 2222]]'). The "
+        f"rule above applies only to claims whose subject is one of the named order(s) above.\n"
+    )
