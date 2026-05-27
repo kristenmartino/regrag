@@ -41,7 +41,11 @@ Each persona produced a small set of seed questions used to drive the eval set i
 
 ## 3. Solution Architecture
 
-The architecture follows the AI/ML lifecycle stages and reuses patterns from a prior production RAG system the author has shipped (Sift, a news synthesis platform).
+The live demo at [regrag.vercel.app](https://regrag.vercel.app) puts the architecture in front of you directly. The landing page surfaces the corpus scope, the demo's safety boundaries, and sample queries that exercise each retrieval pattern:
+
+![RegRAG chat UI — empty state with corpus scope, demo disclaimer, and sample queries](images/chat-empty-state.png)
+
+The architecture follows the AI/ML lifecycle stages and reuses patterns from a prior end-to-end RAG system the author designed and deployed (Sift, a news synthesis platform built for personal and friends-and-family use rather than commercial scale, but covering the same ingestion → embedding → retrieval → grounded-generation lifecycle).
 
 ```mermaid
 flowchart LR
@@ -103,7 +107,11 @@ First, an inexpensive classifier model determines whether the query is a single-
 
 Second, for synthesis queries, a decomposition step breaks the question into sub-queries — one per document, sub-topic, or comparison axis. Third, retrieval runs in parallel against each sub-query, gathering chunks scoped to the appropriate document set. Fourth, a synthesis step generates the final answer with explicit attribution structure: each claim is associated with the sub-query that produced its supporting chunks. Fifth, a verification pass confirms that every cited passage actually exists in the retrieved set before the answer is returned to the user — citations that cannot be verified are stripped or trigger a regeneration.
 
-The agentic framing here is deliberate. The system is not just an LLM with retrieval bolted on; it is a multi-step inspectable workflow where each stage produces a typed artifact (classified intent, sub-query list, retrieved chunks, draft answer, verified citations) that can be logged, replayed, and audited. That property is what makes the system suitable for a public-sector context, not the LLM behind it.
+The agentic framing here is deliberate. The system is not just an LLM with retrieval bolted on; it is a multi-step inspectable workflow where each stage produces a typed artifact (classified intent, sub-query list, retrieved chunks, draft answer, verified citations) that can be logged, replayed, and audited. That property is what makes the system suitable for a public-sector context, not the LLM behind it. The chat UI surfaces this pipeline in real time — the right rail shows each stage as it completes, with per-stage timings and the decomposed sub-queries visible to the user:
+
+![Pipeline panel firing during a multi-doc query — classify (1.2s) and decompose (3.6s) complete, four sub-queries surfaced, retrieve in progress](images/chat-mid-response.png)
+
+This visibility is itself a deliberate choice. A federal user evaluating whether to trust the output needs to see what the system did to produce it. Hiding the pipeline behind a chat bubble would make the answer indistinguishable from a plain LLM completion; surfacing it makes the architecture's value legible to a non-technical reviewer.
 
 ---
 
@@ -206,4 +214,4 @@ None of these are research problems. They are the work that turns a demonstratio
 
 ---
 
-*Built by Kristen Martino. The architecture and patterns in this project draw on a prior production RAG system (Sift, [siftnews.kristenmartino.ai](https://siftnews.kristenmartino.ai)), an energy-domain ML platform (GridPulse, [gridpulse.kristenmartino.ai](https://gridpulse.kristenmartino.ai)), and 10+ years of analytics and program delivery in regulated environments.*
+*Built by Kristen Martino. The architecture and patterns in this project draw on a prior end-to-end RAG system the author designed and deployed (Sift, [siftnews.kristenmartino.ai](https://siftnews.kristenmartino.ai) — built for personal and friends-and-family use, not commercial scale), an energy-domain ML platform (GridPulse, [gridpulse.kristenmartino.ai](https://gridpulse.kristenmartino.ai)), and 10+ years of analytics and program delivery in regulated environments.*
