@@ -63,6 +63,12 @@ class GraphState(TypedDict, total=False):
     verification_result: VerificationResult | None
     final_answer: str | None
     citations_stripped: int               # count from chunk-id verifier (existence check)
+    # Accession-scope verifier (added 2026-05-27 per review finding #9 v3 follow-up):
+    # tracks how many out-of-scope citations were stripped from sentences whose
+    # subject is one of state.named_orders, and how many sentences were dropped
+    # entirely because they had no in-scope citation.
+    scope_citations_stripped: int
+    scope_sentences_dropped: int
     # Inline LLM-judge stripping (Haiku per (claim, chunk) pair):
     sentences_stripped: int               # count of sentences fully removed for unsupported citations
     substantive_citations_stripped: int   # citations stripped from kept sentences
@@ -98,6 +104,8 @@ def initial_state(query: str, user_id: str | None = None) -> GraphState:
         verification_result=None,
         final_answer=None,
         citations_stripped=0,
+        scope_citations_stripped=0,
+        scope_sentences_dropped=0,
         sentences_stripped=0,
         substantive_citations_stripped=0,
         judge_notes=None,

@@ -17,6 +17,7 @@ import logging
 import time
 
 from ...verification.citations import verify_citations
+from ...verification.scope import check_accession_scope
 from ...verification.substantive import check_substantive_support
 from ..state import GraphState
 
@@ -48,17 +49,57 @@ def verify(state: GraphState) -> dict:
     }
 
     if result.action == "regenerate":
-        # Step 2 doesn't run when we're regenerating
+        # Step 2/3 don't run when we're regenerating
         update["regeneration_count"] = regen_count + 1
         timings = dict(state.get("timings", {}))
         timings["verify"] = timings.get("verify", 0) + int((time.perf_counter() - t0) * 1000)
         update["timings"] = timings
         return update
 
+    # ─── Step 1.5: accession-scope check (no LLM, cheap) ───
+    # Enforces per-sentence in-scope citation rule when the query named an
+    # order. Safety net for cases where the synthesis SCOPE prompt didn't
+    # constrain the model fully. Runs BEFORE the substantive judge because
+    # this is a cheap rule that can short-circuit a regen.
+    named_orders = state.get("named_orders") or []
+    anchored = state.get("anchored_accessions") or []
+    scope = check_accession_scope(
+        result.cleaned_text,
+        named_orders,
+        anchored,
+        regeneration_count=regen_count,
+    )
+    if scope.sentences_checked > 0:
+        log.info(
+            "scope check: %s",
+            scope.notes,
+        )
+    if scope.should_regenerate and regen_count < 2:
+        log.info(
+            "scope: %d/%d in-subject sentences violate scope → regenerate",
+            scope.sentences_violating, scope.sentences_checked,
+        )
+        from dataclasses import replace
+        update["scope_citations_stripped"] = len(scope.citations_stripped)
+        update["scope_sentences_dropped"] = len(scope.sentences_dropped)
+        update["regeneration_count"] = regen_count + 1
+        update["verification_result"] = replace(
+            result, action="regenerate",
+            notes=f"scope: {scope.sentences_violating}/{scope.sentences_checked} sentences violate in-scope rule",
+        )
+        timings = dict(state.get("timings", {}))
+        timings["verify"] = timings.get("verify", 0) + int((time.perf_counter() - t0) * 1000)
+        update["timings"] = timings
+        return update
+
+    # Apply scope stripping (cleaned_text now has out-of-scope cites removed)
+    update["scope_citations_stripped"] = len(scope.citations_stripped)
+    update["scope_sentences_dropped"] = len(scope.sentences_dropped)
+
     # ─── Step 2: substantive support check (LLM judge) ───
     sub = check_substantive_support(
         query=state.get("query", ""),
-        draft=result.cleaned_text,
+        draft=scope.cleaned_text,  # use scope-cleaned text, not raw result
         retrieved_chunks=retrieved,
     )
 
