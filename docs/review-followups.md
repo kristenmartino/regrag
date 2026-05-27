@@ -4,7 +4,7 @@ Findings from the multi-perspective review of the deliverable on 2026-05-22. Ite
 
 ---
 
-## Shipped same-day (commit batch following the review)
+## Shipped — review batch 1 (2026-05-22)
 
 | # | What | Fix |
 |---|---|---|
@@ -21,21 +21,24 @@ Findings from the multi-perspective review of the deliverable on 2026-05-22. Ite
 | 26 | UI stage labels were engineer-jargon (`classify`, `decompose`, etc.) | Friendlier: "Understanding your question", "Breaking it into sub-questions", etc. |
 | 5 | Eval headline didn't acknowledge author bias | Added a paragraph after the headline table explicitly framing the numbers as "on author-curated questions" |
 
+## Shipped — review batch 2 (2026-05-26)
+
+| # | What | Fix |
+|---|---|---|
+| 9 | Live demo cited Order 845-A for "effective date of Order 841" queries (canonical citation-misattribution failure mode) | **Doc-anchored retrieval**: when the query names a specific order, a separate top-K vector search restricted to the canonical accession(s) joins the RRF fusion pool, and synthesize injects a SCOPE block telling the model to cite from those accessions or refuse — not substitute a different-order chunk that mentions the named order. Smoke-tested: Order 841 chunk (`20180228-3066:c0259`) now cited directly; 845-A used only as corroboration with explicit cross-reference disclosure. |
+| 8 | CS §7 claimed hybrid retrieval beats pure vector but matched baseline showed identical recall | Softened the claim: "intended to help on identifier-heavy queries; current eval doesn't isolate that subset cleanly." Noted that a v6 cut would add a 5–10 question adversarial subset. Also updated the stale 98.3% number to current 96.9%. |
+| 23 | Anthropic API outage would crash the synthesize node | Wrap `client.messages.create` in try/except → soft refusal with new `refusal_reason="llm_unavailable"`. |
+| 22 | Audit log write was synchronous, serialized chat response on Neon latency | Fire `write_query_log` in a daemon thread from `graph.py`. `write_query_log` creates its own connection so it's thread-safe; failures are logged but never raised. |
+| 33b | Disclaimer didn't mention plaintext query logging | Added bold "**Do not paste confidential client information** — queries are logged in plaintext for audit." |
+| 17 | Refusal accuracy was binary, hid the fact that baselines never refuse anything | Split into refusal_precision and refusal_recall in `AggregateReport`. Recomputed from existing JSON: v5 is 70% P / 87.5% R; both baselines are 0% R (never refused a single OOS question). The split makes the architecture's contribution to refusal capability legible. |
+| 11 | Order 2222 fact sheet had `accession_number: null` → fell back to `url-15ba54edbab1` slug in audit log | Manifest now uses synthetic `factsheet-RM18-9`. Documented that existing DB rows keep the old slug; a reingest of this entry would clean them up. |
+| 28 | No screenshots in case study | Two PNGs in `docs/images/`: chat empty state (corpus + disclaimer + samples) and pipeline panel mid-response (classify+decompose done, 4 sub-queries visible, retrieve in progress). Embedded in §3 and §4 with prose. Capture script at `scripts/screenshot.mjs`. |
+| 27 | No favicon (default Vercel icon) | Added `apps/web/src/app/icon.svg` (citation-bracket motif on slate background). Next.js App Router auto-serves it. |
+| 32b | Sift framing implied commercial deployment | Softened to "prior end-to-end RAG system the author designed and deployed (Sift … built for personal and friends-and-family use, not commercial scale)." |
+
 ---
 
 ## Deferred — high severity but takes real work
-
-### 9. Live demo cites wrong order for fact-finding queries (the canonical citation-drift failure mode, demonstrated live)
-
-**Observed:** "What was the effective date of Order 841?" → answer cites chunk `20190221-3057:c0127` (which is **Order 845-A**, the rehearing of 845, issued 2019-02-21). The 845-A chunk mentions Order 841's effective date in passing. The user reading the answer sees "[[20190221-3057:c0127]]" and would click expecting Order 841 content; they get Order 845-A.
-
-**Why this is hard to fix:** the same failure mode the substantive judge is *supposed* to catch. The judge approved this citation because Order 845-A *does* substantively support the claim — the date is right, the source mentions it. The fix isn't more judging; it's **document-anchored retrieval**: when the query names a specific order, the retriever should heavily prefer chunks FROM that order over chunks that REFERENCE it.
-
-**Sketch of fix:** in `apps/api/src/regrag_api/retrieval/hybrid.py`, when `extract_identifiers(query)` returns one or more order numbers, look up the corresponding accession_numbers from a manifest map and boost RRF scores for chunks with matching `accession_number`. Probably 2-3 hours of work + an eval re-run to measure impact.
-
-**Severity:** high, because this is the demo's canonical failure mode demonstrated in a routine query. A FERC counsel evaluating the demo would catch this in their first 5 questions.
-
----
 
 ### 10. Corpus is missing Order 841-A (the May 2019 rehearing of 841)
 
@@ -44,16 +47,6 @@ Findings from the multi-perspective review of the deliverable on 2026-05-22. Ite
 **Why deferred:** same eLibrary-SPA discovery problem as the rest of the corpus expansion. The URL isn't at a derivable `/sites/default/files/` path; Google searches don't turn it up. Would either need Playwright-driven eLibrary scraping or a third-party mirror like the wrightlaw Order 2023.
 
 **Severity:** medium — affects multi-doc questions about the storage-rule arc. The eval includes a question about "the D.C. Circuit's review of Order 841" which is answered from 841 alone, missing the 841-A clarifications that came BEFORE the D.C. Circuit case.
-
----
-
-### 8. Hybrid retrieval's claim of beating pure vector is unproven on this eval
-
-**Observed:** CS §7 claims hybrid retrieval (vector + keyword + identifier floor) beats pure vector specifically on identifier-heavy queries. But the matched baseline used pure vector and got 95.8% recall on the same 40 questions — essentially identical to RegRAG's 96.9%. The eval doesn't break out an "identifier-heavy queries" subset where the hybrid logic would shine.
-
-**Why deferred:** requires either (a) adding a sub-metric to the eval that tags identifier-heavy questions and reports recall on just that subset, or (b) authoring 5-10 NEW questions specifically designed to fail pure-vector and succeed on identifier-floor. Either is real work + an eval re-run.
-
-**Severity:** medium — the claim in CS §7 is plausibly true (vector embeddings notoriously underweight rare identifier strings) but not measured by this eval. A senior reader will notice.
 
 ---
 
@@ -75,23 +68,11 @@ Current: `logging.basicConfig` with human-readable format. Railway logs are sear
 
 What I'd want: JSON-structured logs with `query_id` linking the per-stage LLM calls to the audit row. Half-day of work; pays back the first time a weird production answer needs debugging.
 
-### 22. Audit log write is synchronous
+### 33. Audit log still captures raw query in plaintext — only the disclaimer is in place
 
-`write_query_log` runs inline in the chat handler. If Neon is slow, the chat response is delayed. There's exception-handling so a Neon outage doesn't break chat, but a slow Neon serializes the response.
+Disclaimer now warns "**Do not paste confidential client information**" (shipped in batch 2 as #33b). But the underlying system still writes the raw query to Neon — no PII detection or scrubbing.
 
-Fix: move the audit write to a background task (FastAPI's `BackgroundTasks` or `asyncio.create_task`). ~30 min.
-
-### 23. No graceful degradation if Anthropic API is down
-
-If the synthesize Sonnet call throws, the graph crashes. No fallback to "we're temporarily unable to answer; please try again."
-
-Fix: wrap each LLM call with `try/except` returning a clean refusal with `refusal_reason='upstream_outage'`. ~30 min.
-
-### 33. Audit log captures raw query in plaintext
-
-If a counsel queries with confidential client info, it lands in Neon. For a public regulated-domain demo this is technically the user's responsibility (they shouldn't), but the disclaimer should call it out and the system could PII-scrub before write.
-
-Defer: out of scope for portfolio demo, in scope for regulated-domain production.
+Defer the PII-scrubbing piece: out of scope for portfolio demo, in scope for regulated-domain production. Likely shape: an inline regex pass for emails, phone numbers, SSN-shaped strings; redact before write.
 
 ### 34. No data retention policy
 
@@ -102,26 +83,6 @@ Defer: same as 33 — out of scope for portfolio, in scope for production.
 ---
 
 ## Deferred — surface polish
-
-### 28. No screenshots in case study
-
-A screenshot of the chat UI mid-response (showing the live pipeline panel firing) would communicate the system's feel more efficiently than the current prose. 30 min if I take screenshots manually; longer if I want them to look polished.
-
-### 27. No favicon
-
-Browser tabs show the default Next/Vercel icon. 5 min fix once I have an icon (a simple SVG of a citation bracket or doc icon would do).
-
-### 11. Order 2222 fact sheet has accession_number=null
-
-The fact sheet is in the corpus but doesn't have a real accession_number (no FERC banner on the PDF). The audit log shows chunks from it as `url-15ba54edbab1`. A counsel wouldn't know how to cite it.
-
-Fix: assign a synthetic accession like `factsheet-RM18-9` and update the manifest. ~10 min.
-
-### 17. Refusal metric is binary, not split into precision/recall
-
-Current metric: `refusal_correct` is True if the system refused-when-expected OR answered-when-expected. A system that refuses everything would score 50% on a balanced set.
-
-Better: split into refusal-precision (of the refusals it made, how many were correct?) and refusal-recall (of the OOS questions, how many did it refuse?). 30 min metric change + eval re-run.
 
 ### 15. Audit log conflates production traffic with eval runs
 
@@ -136,6 +97,6 @@ Fix: add a `run_id` or `traffic_class` column. Schema migration + small refactor
 - **#29 cost model section in CS §7/§8**: would strengthen the buyer-conversation story but isn't critical for a portfolio piece. Easy to fill in conversationally if asked.
 - **#30 explicit "who would buy this" section**: same — useful for sales, not portfolio.
 - **#31 contextualizing 95% CF to buyer trust ladder**: same.
-- **#32b verify Sift framing in CS closing line**: requires knowing what Sift's actual production status is. Out of my context.
+- **#21 structured JSON logging**: production hygiene; matters when there's traffic to debug. Demo doesn't have it.
 
-Total scope: the same-day fixes close ~12 of the 34 findings. The deferred items cluster into 4 categories: (a) real engineering work that needs another half-day each, (b) operational hygiene for production, (c) surface polish, (d) intentional non-goals for a portfolio piece.
+Total scope: 22 of 34 findings shipped across two batches; remaining 12 cluster into (a) real engineering work that needs another half-day each (Order 841-A corpus expansion, human-rater judge calibration), (b) operational hygiene for production (structured logging, PII scrubbing, eval/prod table split), (c) intentional non-goals for a portfolio piece.
