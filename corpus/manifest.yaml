@@ -32,6 +32,38 @@ documents:
     pdf_size_bytes: 623155
     notes: "Storage participation; the version online is the 2018-02-28 errata-corrected text"
 
+  # Federal Register publication of Order 841 — same Final Rule text BUT with the
+  # actual effective date filled in ("June 4, 2018") instead of the [INSERT DATE
+  # 90 DAYS AFTER PUBLICATION] placeholder. Added 2026-05-27 per review finding #9
+  # follow-up: counsel-style queries about Order 841's effective date were forcing
+  # the synthesizer to substitute Order 845-A chunks (which mention 841 in passing)
+  # because Order 841's own chunks contained only the placeholder. This source gives
+  # the synthesizer a chunk with literal "effective June 4, 2018" prose to cite.
+  - order_number: "841"
+    accession_number: "fr-2018-03-06-2018-03708"
+    docket_numbers: ["RM16-23-000", "AD16-20-000"]
+    document_type: "federal_register_publication"
+    issue_date: "2018-03-06"
+    title: "Electric Storage Participation in Markets Operated by Regional Transmission Organizations and Independent System Operators (Federal Register version)"
+    ferc_cite: "83 FR 9580"
+    pdf_url: "https://www.govinfo.gov/content/pkg/FR-2018-03-06/pdf/2018-03708.pdf"
+    pdf_size_bytes: 471539
+    notes: "FR-published version of Order 841 with literal effective date (June 4, 2018) filled in. Companion to the FERC-issued errata version (20180228-3066)."
+
+  # Order 841-A — rehearing of Order 841. Substantively important: addressed state
+  # opt-out, storage definitions, jurisdictional questions. Added 2026-05-27 per
+  # deferred review finding #10 ("corpus missing Order 841-A").
+  - order_number: "841-A"
+    accession_number: "20190516-3057"  # verify on first ingest; analogous to 845-A pattern (20190221-3057)
+    docket_numbers: ["RM16-23-001", "AD16-20-001"]
+    document_type: "rehearing_order"
+    issue_date: "2019-05-16"
+    title: "Electric Storage Participation in Markets Operated by Regional Transmission Organizations and Independent System Operators — Order on Rehearing and Clarification"
+    ferc_cite: "167 FERC ¶ 61,154"
+    pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/E-1_15.pdf"
+    pdf_size_bytes: 870216
+    notes: "Rehearing of Order 841; affirmed core determinations, addressed petitions on state opt-out and storage definitions."
+
   - order_number: "745"
     accession_number: "20110315-3061"  # verify on first ingest
     docket_numbers: ["RM10-17-000"]

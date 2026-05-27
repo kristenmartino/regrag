@@ -18,7 +18,7 @@ from ..state import GraphState
 
 log = logging.getLogger(__name__)
 
-PER_QUERY_K = 8                # chunks per single retrieval call
+PER_QUERY_K = 10               # chunks per single retrieval call (bumped from 8 on 2026-05-27 so anchored chunks that rank 9-10 in fusion reach the synthesizer — relevant when corpus has multiple in-scope sources for the same named order, e.g. FERC-issued + Federal-Register variants)
 # TODO: recalibrate COSINE_REFUSAL_THRESHOLD against the eval set distribution
 # once it exists (see docs/implementation-plan.md §2.8). Empirical observation
 # from Days 6-7 smoke tests: identifier-heavy in-scope queries naturally have
