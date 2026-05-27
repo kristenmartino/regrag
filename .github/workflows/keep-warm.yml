@@ -1,10 +1,19 @@
 name: keep-warm
 
-# Pings the Railway backend every 5 minutes to keep the free-tier container
+# Pings the Railway backend on a schedule to keep the free-tier container
 # warm. First request after idle takes 30-60s to cold-start, which silently
-# kills first-impression UX. GitHub Actions schedule is best-effort (the
-# minimum interval is 5 min and runs may be delayed during high load), but
-# in practice it keeps the demo responsive during business hours.
+# kills first-impression UX.
+#
+# IMPORTANT: GitHub Actions cron is BEST-EFFORT and the actual interval is
+# typically 30-60 minutes during platform load, not the configured 5 minutes.
+# Verified by `gh run list --workflow=keep-warm` showing 40-45 min gaps
+# between consecutive successful runs. The real reliability mechanism is
+# the frontend's mount-time pre-warm in apps/web/src/components/chat.tsx —
+# visitors who arrive on a cold container see the warming banner instead
+# of a frozen UI.
+#
+# Production deployments should not rely on this for SLA-critical workloads.
+# Upgrade to Railway always-on tier or use a paid uptime monitor.
 #
 # The frontend's mount-time pre-warm in components/chat.tsx is the backup —
 # even if a cron run is missed, the user sees the warming hint and the

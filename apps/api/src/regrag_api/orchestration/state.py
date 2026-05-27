@@ -23,6 +23,7 @@ Classification = Literal["single_doc", "multi_doc"]
 RefusalReason = Literal[
     "no_relevant_chunks",      # pre-generation: top vector hit below threshold
     "llm_refusal",             # generation model returned refused=true
+    "llm_unavailable",         # upstream LLM call failed (outage, rate limit, network)
     "verification_unrecoverable",  # too many bad citations after max regens
 ]
 
@@ -49,6 +50,12 @@ class GraphState(TypedDict, total=False):
     # Retrieval result — list of dicts (serializable, snapshot-friendly for audit log)
     retrieved_chunks: list[dict] | None
     top_cosine_sim: float | None       # used for pre-generation refusal trigger
+    # Named-order metadata for downstream synthesis (review finding #9):
+    # when the query names a specific order, surface the canonical accessions
+    # so the synthesizer can prefer same-accession citations over chunks that
+    # merely *reference* the named order.
+    named_orders: list[str] | None
+    anchored_accessions: list[str] | None
 
     # Generation
     draft_answer: str | None             # raw model output (last attempt) before verification
@@ -84,6 +91,8 @@ def initial_state(query: str, user_id: str | None = None) -> GraphState:
         sub_queries=None,
         retrieved_chunks=None,
         top_cosine_sim=None,
+        named_orders=None,
+        anchored_accessions=None,
         draft_answer=None,
         cited_chunk_ids=None,
         verification_result=None,

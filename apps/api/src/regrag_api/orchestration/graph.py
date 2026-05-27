@@ -7,6 +7,7 @@ Compiled lazily on first use.
 from __future__ import annotations
 
 import logging
+import threading
 from functools import lru_cache
 from typing import Iterator
 
@@ -71,17 +72,30 @@ def build_graph():
     return g.compile()
 
 
+def _audit_in_background(state: GraphState) -> None:
+    """Write the audit row in a daemon thread so Neon latency doesn't block
+    the chat response. write_query_log creates its own connection, so it's
+    thread-safe. Exceptions are caught and logged — never raised."""
+    def _target():
+        try:
+            write_query_log(state)
+        except Exception as e:  # pragma: no cover — defensive; write_query_log catches its own
+            log.warning("audit write (background) failed: %s: %s", type(e).__name__, e)
+    threading.Thread(target=_target, daemon=True).start()
+
+
 def run(query: str, *, user_id: str | None = None, audit: bool = True) -> GraphState:
     """Run the graph end-to-end on a query. Returns the final state.
 
-    audit=True (default) writes one row to query_log per invocation. Failures
-    are logged but never raised — the chat answer is more important than the
-    audit row.
+    audit=True (default) writes one row to query_log per invocation in a
+    background thread, so Neon latency doesn't serialize the chat response.
+    Failures are logged but never raised — the chat answer is more important
+    than the audit row.
     """
     graph = build_graph()
     state = graph.invoke(initial_state(query, user_id=user_id))
     if audit:
-        write_query_log(state)
+        _audit_in_background(state)
     return state
 
 
@@ -126,10 +140,7 @@ def run_streaming(query: str, *, user_id: str | None = None, audit: bool = True)
             }
 
     if audit:
-        try:
-            write_query_log(state)
-        except Exception as e:  # pragma: no cover
-            log.warning("audit write in streaming run failed: %s", e)
+        _audit_in_background(state)
 
     yield {"type": "done", "state": _serialize_state_for_client(state)}
 

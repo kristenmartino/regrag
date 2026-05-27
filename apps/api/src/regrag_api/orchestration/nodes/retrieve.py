@@ -13,6 +13,7 @@ from dataclasses import asdict
 from typing import Iterable
 
 from ...retrieval.hybrid import RetrievedChunk, hybrid_retrieve
+from ...retrieval.identifiers import extract_identifiers
 from ..state import GraphState
 
 log = logging.getLogger(__name__)
@@ -57,6 +58,13 @@ def _retrieve_for_queries(
     # Convert to serializable dicts for state (audit log will snapshot these)
     chunks_serializable = [_to_dict(c) for c in all_chunks]
 
+    # Derive named-order metadata so synthesize can prefer same-accession citations
+    # when the user named a specific order (review finding #9).
+    named_orders = sorted({o for q in queries for o in extract_identifiers(q).orders})
+    anchored_accessions = sorted({
+        c.accession_number for c in all_chunks if c.anchored_match
+    })
+
     refusal_emitted = top_cosine < COSINE_REFUSAL_THRESHOLD
     refusal_reason = "no_relevant_chunks" if refusal_emitted else None
 
@@ -74,6 +82,8 @@ def _retrieve_for_queries(
     update = {
         "retrieved_chunks": chunks_serializable,
         "top_cosine_sim": top_cosine,
+        "named_orders": named_orders,
+        "anchored_accessions": anchored_accessions,
         "refusal_emitted": refusal_emitted,
         "refusal_reason": refusal_reason,
         "timings": timings,
@@ -98,8 +108,10 @@ def _to_dict(c: RetrievedChunk) -> dict:
         "parent_chunk_id": c.parent_chunk_id,
         "vector_rank": c.vector_rank,
         "keyword_rank": c.keyword_rank,
+        "anchored_rank": c.anchored_rank,
         "cosine_sim": c.cosine_sim,
         "ts_rank": c.ts_rank,
         "floor_match": c.floor_match,
+        "anchored_match": c.anchored_match,
         "rrf_score": c.rrf_score,
     }

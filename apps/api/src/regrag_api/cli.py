@@ -54,7 +54,9 @@ def retrieve(query: tuple[str, ...], top_k: int, verbose: int):
         marks = []
         if r.vector_rank is not None: marks.append(f"v#{r.vector_rank}")
         if r.keyword_rank is not None: marks.append(f"k#{r.keyword_rank}")
+        if r.anchored_rank is not None: marks.append(f"a#{r.anchored_rank}")
         if r.floor_match: marks.append("floor")
+        if r.anchored_match: marks.append("anchored")
         marks_str = ",".join(marks)
 
         scores = []

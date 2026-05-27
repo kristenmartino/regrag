@@ -41,7 +41,11 @@ Each persona produced a small set of seed questions used to drive the eval set i
 
 ## 3. Solution Architecture
 
-The architecture follows the AI/ML lifecycle stages and reuses patterns from a prior production RAG system the author has shipped (Sift, a news synthesis platform).
+The live demo at [regrag.vercel.app](https://regrag.vercel.app) puts the architecture in front of you directly. The landing page surfaces the corpus scope, the demo's safety boundaries, and sample queries that exercise each retrieval pattern:
+
+![RegRAG chat UI — empty state with corpus scope, demo disclaimer, and sample queries](images/chat-empty-state.png)
+
+The architecture follows the AI/ML lifecycle stages and reuses patterns from a prior end-to-end RAG system the author designed and deployed (Sift, a news synthesis platform built for personal and friends-and-family use rather than commercial scale, but covering the same ingestion → embedding → retrieval → grounded-generation lifecycle).
 
 ```mermaid
 flowchart LR
@@ -103,7 +107,11 @@ First, an inexpensive classifier model determines whether the query is a single-
 
 Second, for synthesis queries, a decomposition step breaks the question into sub-queries — one per document, sub-topic, or comparison axis. Third, retrieval runs in parallel against each sub-query, gathering chunks scoped to the appropriate document set. Fourth, a synthesis step generates the final answer with explicit attribution structure: each claim is associated with the sub-query that produced its supporting chunks. Fifth, a verification pass confirms that every cited passage actually exists in the retrieved set before the answer is returned to the user — citations that cannot be verified are stripped or trigger a regeneration.
 
-The agentic framing here is deliberate. The system is not just an LLM with retrieval bolted on; it is a multi-step inspectable workflow where each stage produces a typed artifact (classified intent, sub-query list, retrieved chunks, draft answer, verified citations) that can be logged, replayed, and audited. That property is what makes the system suitable for a public-sector context, not the LLM behind it.
+The agentic framing here is deliberate. The system is not just an LLM with retrieval bolted on; it is a multi-step inspectable workflow where each stage produces a typed artifact (classified intent, sub-query list, retrieved chunks, draft answer, verified citations) that can be logged, replayed, and audited. That property is what makes the system suitable for a public-sector context, not the LLM behind it. The chat UI surfaces this pipeline in real time — the right rail shows each stage as it completes, with per-stage timings and the decomposed sub-queries visible to the user:
+
+![Pipeline panel firing during a multi-doc query — classify (1.2s) and decompose (3.6s) complete, four sub-queries surfaced, retrieve in progress](images/chat-mid-response.png)
+
+This visibility is itself a deliberate choice. A federal user evaluating whether to trust the output needs to see what the system did to produce it. Hiding the pipeline behind a chat bubble would make the answer indistinguishable from a plain LLM completion; surfacing it makes the architecture's value legible to a non-technical reviewer.
 
 ---
 
@@ -165,7 +173,7 @@ Four decisions shaped the system most and are the ones worth defending in detail
 
 **Chunk size and section preservation.** Larger chunks preserve regulatory context (a paragraph that references an earlier section needs that section nearby) but reduce retrieval precision (more text per chunk dilutes the embedding signal). The compromise is a section-aware splitter that produces variable-size chunks bounded by a target ~800 tokens max, ~200 tokens min. Section boundaries come from FERC's own paragraph numbering (`170. Some commenters...`) where present, with a fallback to hierarchical section headings (`6. Single Resource Aggregation` → `a. NOPR Proposal`) for orders that use that structure (Order 2222 in particular). Naive fixed-token chunking would fragment regulatory citations that span multiple paragraphs and is the failure mode this design avoids.
 
-**Hybrid versus pure-vector retrieval.** Pure vector search misses queries that hinge on exact identifiers — "Order 2222," docket number RM18-9, statutory references. The hybrid approach combines top-20 vector similarity with top-10 keyword matches over a 'simple'-tokenizer GIN index (preserves modal verbs and identifiers that English stemming would strip), fused via reciprocal rank fusion (k=60). An additional identifier-match recall floor guarantees that any chunk containing an exact identifier from the query is included in results regardless of vector or keyword score. On the eval set, retrieval recall reaches 98.3% — the corpus reliably surfaces the chunks that contain the answer, even when the surface form of the query doesn't match the chunk text closely.
+**Hybrid versus pure-vector retrieval.** Pure vector search is designed to miss queries that hinge on exact identifiers — "Order 2222," docket number RM18-9, statutory references — because the embedding space treats those tokens as low-information. The hybrid approach combines top-20 vector similarity with top-10 keyword matches over a 'simple'-tokenizer GIN index (preserves modal verbs and identifiers that English stemming would strip), fused via reciprocal rank fusion (k=60). An additional identifier-match recall floor guarantees that any chunk containing an exact identifier from the query is included in results regardless of vector or keyword score. A document-anchored retrieval step (added after the v5 review) restricts a separate top-K vector search to the canonical accession(s) of any order named in the query, fixing the failure mode where a chunk that *references* Order N outranks chunks *from* Order N itself. Across the full 40-question eval, retrieval recall is **96.9%** — the corpus reliably surfaces the chunks that contain the answer. **Honest caveat:** the matched baseline running pure-vector retrieval (no keyword, no identifier floor) hit the same recall on this eval. The hybrid components are designed to help on the identifier-heavy long tail; the current eval doesn't isolate that subset cleanly, so the claim that hybrid outperforms pure vector on regulatory queries is plausible but unmeasured here. A v6 cut would add a 5-10 question adversarial subset of pure identifier lookups to make the comparison meaningful.
 
 **When to invoke the agentic decomposition.** The decomposition step adds ~2x latency (median 22s for multi-doc vs. 10s for single-doc) and an extra Sonnet call. Invoking it on every query would degrade the experience on single-document lookups. The classification step exists specifically to gate this decision; misclassification toward the agentic path wastes ~12 seconds and one Sonnet call, while misclassification away from it produces worse answers on synthesis questions because single-pass retrieval can't guarantee per-document coverage on comparative queries.
 
@@ -198,7 +206,7 @@ None of these are research problems. They are the work that turns a demonstratio
 ## 9. Outcomes and Artifacts
 
 - **Live demo:** [regrag.vercel.app](https://regrag.vercel.app) — public, no auth (per §8 demo design); sample queries in the empty state. Cold start ~5–10s on first request after idle, then fast.
-- **Source code:** [github.com/kristenmartino/regrag](https://github.com/kristenmartino/regrag) — full monorepo (`apps/api` FastAPI + LangGraph, `apps/web` Next.js + shadcn/ui, `apps/ingest` corpus pipeline, `packages/eval` 28-question harness).
+- **Source code:** [github.com/kristenmartino/regrag](https://github.com/kristenmartino/regrag) — full monorepo (`apps/api` FastAPI + LangGraph, `apps/web` Next.js + shadcn/ui, `apps/ingest` corpus pipeline, `packages/eval` 40-question harness + baselines).
 - **Architecture diagram:** inline above in §3.
 - **LangGraph workflow diagram:** inline above in §4.
 - **Evaluation results:** [docs/eval-results.md](eval-results.md) — current run is 96.9% retrieval recall / 90.0% refusal accuracy / 95.4% citation faithfulness across 40 questions on the 15-doc corpus. Includes per-persona breakdown, baseline comparison (vs vanilla RAG), and a "what didn't work" section on the structured-output verification experiment.
@@ -206,4 +214,4 @@ None of these are research problems. They are the work that turns a demonstratio
 
 ---
 
-*Built by Kristen Martino. The architecture and patterns in this project draw on a prior production RAG system (Sift, [siftnews.kristenmartino.ai](https://siftnews.kristenmartino.ai)), an energy-domain ML platform (GridPulse, [gridpulse.kristenmartino.ai](https://gridpulse.kristenmartino.ai)), and 10+ years of analytics and program delivery in regulated environments.*
+*Built by Kristen Martino. The architecture and patterns in this project draw on a prior end-to-end RAG system the author designed and deployed (Sift, [siftnews.kristenmartino.ai](https://siftnews.kristenmartino.ai) — built for personal and friends-and-family use, not commercial scale), an energy-domain ML platform (GridPulse, [gridpulse.kristenmartino.ai](https://gridpulse.kristenmartino.ai)), and 10+ years of analytics and program delivery in regulated environments.*
