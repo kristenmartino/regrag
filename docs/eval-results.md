@@ -80,24 +80,26 @@ The net is favorable — refusal accuracy +2.5pp, refusal precision +7.8pp, the 
 
 | Policy | Refusal precision | Refusal recall | False-refused in-scope | Refusal accuracy |
 |---|---|---|---|---|
-| Self-flag (gate off) | **90.9%** | 87.0% (20/23) | 2 | **90.9%** |
+| Self-flag (gate off) | **90.9%** | 87.0% (20/23) | 2 | 90.9% |
 | Gate, **all** queries | 63.9% | **100%** (23/23) | 13 | 76.4% |
-| Gate, **single_doc** only | 80.8% | 91.3% (21/23) | 5 | 89.1% |
+| Gate, **single_doc** only | 84.6% | 95.7% (22/23) | 4 | 90.9% |
 
-Gating *all* queries reaches 100% recall but collapses precision — it false-refuses 9 multi-doc synthesis questions, because on a cross-document question each retrieved chunk only partially covers the ask and the gate misreads distributed-but-present support as "unanswerable." Restricting the gate to `single_doc`-classified queries recovers most of that precision, but the real run still lands *below* the self-flag baseline on both accuracy (89.1% vs 90.9%) and precision (80.8% vs 90.9%) for a +4.3pp recall gain. (It's also sensitive to classifier error: two genuinely multi-doc researcher questions were mislabeled `single_doc`, so the gate ran and over-refused them.)
+Gating *all* queries reaches 100% recall but collapses precision — it false-refuses 9 multi-doc synthesis questions, because on a cross-document question each retrieved chunk only partially covers the ask and the gate misreads distributed-but-present support as "unanswerable." Restricting the gate to `single_doc`-classified queries fixes that: it lands at **identical accuracy** to the self-flag baseline (90.9%, 50/55 both) — a pure rebalance, trading **−6.3pp precision for +8.7pp recall**. It converts 2 missed OOS questions into catches and creates 2 new false-refusals (`counsel-003`, `compliance-004`), a literal wash on count. (It's also sensitive to classifier error: a question mislabeled `single_doc` gets gated and can be over-refused.)
 
 **The decisive per-category finding:**
+
+The decisive per-category finding:
 
 | category | self-flag recall | gate (single_doc) recall |
 |---|---|---|
 | topic_absent | 7/8 | 7/8 |
 | false_premise | **6/6** | 6/6 |
 | order_conflation | **5/5** | 5/5 |
-| jurisdiction_boundary | 2/4 | 3/4 |
+| jurisdiction_boundary | 2/4 | **4/4** |
 
-The synthesizer's existing self-flag **already catches every false_premise and order_conflation question** — the exact categories the gate was built to catch. Handed chunks that don't support a false-premise or conflated question, the synthesizer already declines. The gate's *only* marginal contribution is one additional `jurisdiction_boundary` catch (2/4 → 3/4), bought at a ~10pp precision cost.
+The synthesizer's existing self-flag **already catches every false_premise and order_conflation question** — the exact categories the gate was built to catch. Handed chunks that don't support a false-premise or conflated question, the synthesizer already declines. The gate's contribution is concentrated entirely in `jurisdiction_boundary`, where it closes the gap fully (2/4 → 4/4) — including the originally-motivating `researcher-oos-002` retail-price question. `topic_absent` stays 7/8 (the one miss is a multi-doc OOS the gate doesn't run on).
 
-**Conclusion — a negative result, documented not buried.** The answerability gate is **not worth enabling**. It ships behind `REGRAG_ANSWERABILITY_GATE` (default **off**) and is preserved as a documented experiment, the way the v4 structured-output verification is. The existing self-flag is better-calibrated than the issue assumed; the residual weakness is narrow (jurisdiction-boundary, 2/4) and a blanket answerability gate overcorrects it at a real cost to answerable questions. If jurisdiction calibration matters for a specific deployment, the right tool is a targeted scope/jurisdiction classifier, not a general answerability gate. The durable wins from this work are the **expanded 23-question OOS set** and the **per-category recall tagging**, which stay in the harness and make future refusal work measurable.
+**Conclusion — an accuracy-neutral rebalance, kept off by default.** Restricted to `single_doc` queries, the gate is a *wash on accuracy* (90.9% = 90.9%): it trades 6.3pp of refusal precision for 8.7pp of recall, fully closing the jurisdiction-boundary gap but adding two false-refusals of answerable questions. Whether that trade is worth it is domain-dependent — in a regulated setting that prizes "I don't know" over a confident wrong answer, recall-favoring is defensible; on raw accuracy it's neutral. So the gate ships behind `REGRAG_ANSWERABILITY_GATE` (default **off**) and is preserved as a documented, toggle-able experiment (like the v4 structured-output verification): **enable it if a deployment's query mix is jurisdiction-heavy and recall-favoring; leave it off otherwise.** The two findings that matter most regardless: (1) the existing self-flag is already well-calibrated for the dangerous false-premise/conflation categories — no gate needed there; (2) the durable wins are the **expanded 23-question OOS set** and **per-category recall tagging**, which stay in the harness and make future refusal work measurable.
 
 ## Architecture change driving the CF gain
 

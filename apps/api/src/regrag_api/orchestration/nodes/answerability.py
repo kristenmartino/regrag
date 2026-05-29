@@ -1,13 +1,14 @@
 """Answerability gate — a flagged pre-synthesis check.
 
-STATUS (issue #3 A/B, 2026-05-29): OFF by default and recommended to stay off.
-The 55-question A/B found the synthesizer's existing `refused: true` self-flag
-ALREADY catches every false_premise (6/6) and order_conflation (5/5) case — the
-categories this gate was built for. The gate's only marginal gain is one extra
-jurisdiction_boundary catch (2/4 → 3/4), bought at a ~10pp refusal-precision drop
-(91% → 81%) and a net accuracy loss (90.9% → 89.1%). Preserved as a documented
-experiment (see docs/eval-results.md "Answerability gate experiment"); enable only
-if a deployment's query mix is jurisdiction-heavy and you accept the precision cost.
+STATUS (issue #3 A/B, 2026-05-29): OFF by default; an accuracy-neutral rebalance.
+The 55-question A/B (restricted to single_doc queries) found the gate is a *wash*
+on refusal accuracy (90.9% = 90.9% vs self-flag) — it trades −6.3pp precision
+(90.9% → 84.6%) for +8.7pp recall (87.0% → 95.7%). The synthesizer's existing
+`refused: true` self-flag ALREADY catches every false_premise (6/6) and
+order_conflation (5/5) case, so the gate's entire contribution is closing the
+jurisdiction_boundary gap (2/4 → 4/4). Worth enabling only if a deployment's query
+mix is jurisdiction-heavy and favors recall ("I don't know" over a confident wrong
+answer); otherwise leave off. See docs/eval-results.md "Answerability gate experiment".
 
 Runs between retrieve and synthesize when REGRAG_ANSWERABILITY_GATE is set.
 Asks a cheap Haiku call: do the retrieved chunks actually contain what's needed
@@ -85,13 +86,13 @@ def answerability_gate(state: GraphState) -> dict:
 
     # Only gate single-document queries. Data-driven (issue #3 A/B on the 55-q
     # set): gating ALL queries hits 100% refusal recall but collapses precision
-    # 91%→64% by false-refusing 9 multi-doc synthesis questions — for a
+    # 90.9%→63.9% by false-refusing 9 multi-doc synthesis questions — for a
     # cross-document question, each retrieved chunk only partially covers the
     # ask, so the gate misjudges distributed-but-present answers as unanswerable.
-    # Restricting to single_doc keeps precision at 91% while lifting recall to
-    # 96% (catches all false-premise + order-conflation cases, which name a
-    # single in-corpus order and classify single_doc). Multi-doc queries fall
-    # back to the synthesizer's own refusal self-flag.
+    # Restricting to single_doc makes it accuracy-neutral vs the self-flag
+    # (90.9% = 90.9%): precision 84.6%, recall 95.7% — a −6.3pp/+8.7pp rebalance
+    # that fully closes the jurisdiction_boundary gap (2/4 → 4/4). Multi-doc
+    # queries fall back to the synthesizer's own refusal self-flag.
     if state.get("classification") == "multi_doc":
         return {"answerability_checked": False}
 
