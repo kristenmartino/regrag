@@ -47,9 +47,13 @@ FOOTER_DOCKET_RE = re.compile(
 )
 STANDALONE_NUMERIC_RE = re.compile(r"^\s*(\d{1,3})\s*$")
 PARAGRAPH_BOUNDARY_RE = re.compile(r"^(\d{1,4})\.\s+[A-Z]")  # FERC "170. Some commenters..."
-# TOC lines have many dot-leaders followed by a page number, e.g.
-# "1. Scope of Final Rule .................................. 31."
-TOC_LINE_RE = re.compile(r"\.{4,}\s*\d+\.?\s*$")
+# TOC lines have many dot-leaders. Original regex required a trailing page
+# number ("\.{4,}\s*\d+\.?\s*$") but multi-column FR extraction often drops
+# the page-number column. Loosened to match any line with 4+ consecutive dots
+# (with optional trailing whitespace/number). Catches both styles:
+#   "1. Scope of Final Rule .................................. 31."
+#   "2. Commission Determination ........."         (column-stripped variant)
+TOC_LINE_RE = re.compile(r"\.{4,}\s*\d*\.?\s*$")
 # The "Federal Register" PDF format starts with the FERC citation line,
 # e.g. "172 FERC ¶ 61,247" — used as a fallback to detect the format
 FEDERAL_REGISTER_HEADER_RE = re.compile(r"^\s*\d{1,3}\s+FERC\s+[¶P]\s+\d{2},\d{3}\s*$")
@@ -85,8 +89,18 @@ class ParsedDocument:
     parser: str = "pdfplumber"
 
 
-def parse_pdf(pdf_path: Path) -> ParsedDocument:
-    pages = _extract_pages(pdf_path)
+def parse_pdf(pdf_path: Path, *, layout: str | None = None) -> ParsedDocument:
+    """Parse a PDF into sections + footnotes.
+
+    Args:
+        pdf_path: path to the source PDF.
+        layout: optional layout hint. None or 'single_column' uses the default
+            text-flow extraction; 'federal_register' uses column-aware
+            extraction (3 columns, common for Federal Register publications).
+            Auto-detected when None if first-page text matches Federal Register
+            header pattern.
+    """
+    pages = _extract_pages(pdf_path, layout=layout)
     accession = _extract_accession(pages[0] if pages else "")
     cleaned_body, footnotes = _split_body_and_footnotes(pages)
     sections = _segment_into_paragraphs(cleaned_body)
@@ -99,12 +113,74 @@ def parse_pdf(pdf_path: Path) -> ParsedDocument:
     )
 
 
-def _extract_pages(pdf_path: Path) -> list[str]:
+def _extract_pages(pdf_path: Path, *, layout: str | None = None) -> list[str]:
+    """Extract page text. Default = pdfplumber's text-flow extraction (good
+    for single-column FERC-issued PDFs). When layout='federal_register' or
+    auto-detected as such, crops each page into 3 columns and extracts each
+    column separately — fixes the zig-zag scramble that single-column
+    extraction produces on multi-column Federal Register layouts.
+    """
     pages: list[str] = []
     with pdfplumber.open(pdf_path) as pdf:
+        if layout is None:
+            # auto-detect: check first page for FR header
+            first_text = pdf.pages[0].extract_text(x_tolerance=2, y_tolerance=2) or ""
+            if _looks_like_federal_register(first_text):
+                layout = "federal_register"
+                log.info("auto-detected federal_register layout for %s", pdf_path.name)
         for p in pdf.pages:
-            pages.append(p.extract_text(x_tolerance=2, y_tolerance=2) or "")
+            if layout == "federal_register":
+                pages.append(_extract_federal_register_page(p))
+            else:
+                pages.append(p.extract_text(x_tolerance=2, y_tolerance=2) or "")
     return pages
+
+
+def _looks_like_federal_register(first_page_text: str) -> bool:
+    """Heuristic: Federal Register pages have a 'Federal Register / Vol. X, No. Y'
+    line near the top. The text-flow extraction will surface that string somewhere
+    in the first ~5 lines even when the layout is scrambled."""
+    head = first_page_text[:800]
+    return "Federal Register" in head and "Vol." in head and "No." in head
+
+
+# Standard Federal Register layout: 3 columns of equal width with narrow
+# gutters. Tuned against the 2018-03-06 RIN 1902-AF45 issue (Order 841 publication).
+# Page width 612pt (US Letter). Each column gets a small right-side padding
+# (+12pt) so characters whose glyph extends past the visual column edge
+# (especially italic terminal chars or hyphenated line-ends) get captured.
+# pdfplumber's word-detection assigns each word to the column whose bbox
+# fully contains its x0, so the overlap doesn't double-count words —
+# subsequent columns crop starts past the previous column's natural end.
+FR_COLUMN_BOUNDS = (
+    (30, 210),
+    (212, 392),
+    (394, 588),
+)
+
+
+def _extract_federal_register_page(page) -> str:
+    """Extract text from a single page assuming 3-column Federal Register layout.
+
+    Crops each column, extracts its text in natural reading order (top-to-bottom),
+    then concatenates columns left-to-right. Result reads as proper running text
+    instead of the zig-zag scramble that whole-page extraction produces.
+    """
+    column_texts: list[str] = []
+    for x0, x1 in FR_COLUMN_BOUNDS:
+        try:
+            col = page.crop((x0, 0, x1, page.height))
+            t = col.extract_text(x_tolerance=2, y_tolerance=2) or ""
+            column_texts.append(t)
+        except Exception as e:
+            # If a column extraction errors (e.g., page has unusual layout),
+            # fall back to whole-page extraction for this column slot to avoid
+            # losing all the page's text.
+            log.warning("FR column crop (%d,%d) failed: %s — using empty", x0, x1, e)
+            column_texts.append("")
+    # Page-level header (before columns) sometimes lives above the column tops;
+    # fetch it via a thin top strip if columns start partway down.
+    return "\n".join(t for t in column_texts if t.strip())
 
 
 def _extract_accession(first_page_text: str) -> str | None:

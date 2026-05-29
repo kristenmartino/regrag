@@ -34,7 +34,20 @@ from .identifiers import ExtractedIdentifiers, extract_identifiers
 
 VECTOR_TOPK = 20
 KEYWORD_TOPK = 10
-ANCHORED_TOPK = 8       # per-order anchored retrieval
+ANCHORED_TOPK = 8       # legacy total cap (kept for back-compat in case path)
+ANCHORED_PER_ACCESSION = 6   # NEW (2026-05-27): per-accession anchored quota. When the
+                             # named order maps to multiple accessions (e.g. an order +
+                             # its rehearing + its Federal Register version), each gets
+                             # this many guaranteed top-vector slots. Without this, the
+                             # densest-prose accession (typically the rehearing order)
+                             # wins all anchored slots and other in-scope sources are
+                             # invisible — e.g. the FR-published version that has the
+                             # literal effective date filled in.
+                             # Empirically tuned: 6 was needed for FR-published version's
+                             # "effective on [date]" body paragraph to enter the pool;
+                             # the FR doc's preamble/TOC chunks have higher vector
+                             # similarity to abstract queries than the substantive
+                             # date-stating paragraph.
 RRF_K_CONST = 60
 FLOOR_MAX = 5
 EMBEDDING_MODEL = "voyage-3.5-lite"
@@ -91,12 +104,31 @@ def hybrid_retrieve(
         # a separate top-K search to chunks from that order's accession_number(s).
         # Guarantees chunks FROM the order are in the fusion pool even if
         # chunks ABOUT the order from other docs would otherwise outrank them.
+        #
+        # Per-accession quota (2026-05-27): instead of one combined top-K
+        # across all in-scope accessions, run a separate top-K search per
+        # accession. This prevents the densest-prose accession (e.g. an
+        # 87-chunk rehearing order) from claiming all 8 slots and squeezing
+        # out shorter in-scope sources (e.g. a Federal-Register publication
+        # with the literal effective date).
+        #
+        # Each hit carries its PER-ACCESSION rank in `_anchored_rank_in_acc`
+        # so RRF can score each accession's #1 with the same weight (otherwise
+        # the third accession's #1 lands at global position 13 and gets ~0
+        # RRF contribution).
         anchored_accessions = _accessions_for_named_orders(conn, ids)
-        anchored_hits = (
-            _vector_topk_within_accessions(conn, query_emb, anchored_accessions, k=ANCHORED_TOPK)
-            if anchored_accessions
-            else []
-        )
+        anchored_hits: list[dict] = []
+        seen_anchored: set[str] = set()
+        for acc in anchored_accessions:
+            for per_acc_rank, hit in enumerate(
+                _vector_topk_within_accessions(conn, query_emb, [acc], k=ANCHORED_PER_ACCESSION),
+                start=1,
+            ):
+                if hit["chunk_id"] in seen_anchored:
+                    continue
+                seen_anchored.add(hit["chunk_id"])
+                hit["_anchored_rank_in_acc"] = per_acc_rank
+                anchored_hits.append(hit)
 
         fused = _rrf_fuse(vector_hits, keyword_hits, floor_hits, anchored_hits, anchored_accessions)
         return fused[:k]
@@ -358,11 +390,16 @@ def _rrf_fuse(
     score above 0 but don't dominate. Anchored hits get RRF scoring AND
     a flag set on the resulting chunk for inspection.
     """
-    # Build maps from chunk_id → (rank, payload) per list
+    # Build maps from chunk_id → (rank, payload) per list.
+    # For anchored hits, use the PER-ACCESSION rank (set during build) so each
+    # in-scope accession's #1 contributes equally — otherwise a 3-accession
+    # named order would put accession-3's #1 at global rank 13, virtually
+    # zero-ing its RRF contribution.
     vmap = {h["chunk_id"]: (i + 1, h) for i, h in enumerate(vector_hits)}
     kmap = {h["chunk_id"]: (i + 1, h) for i, h in enumerate(keyword_hits)}
     fmap = {h["chunk_id"]: (FLOOR_MAX, h) for h in floor_hits}
-    amap = {h["chunk_id"]: (i + 1, h) for i, h in enumerate(anchored_hits)}
+    amap = {h["chunk_id"]: (h.get("_anchored_rank_in_acc", i + 1), h)
+            for i, h in enumerate(anchored_hits)}
     anchored_acc_set = set(anchored_accessions)
 
     all_ids = set(vmap) | set(kmap) | set(fmap) | set(amap)
@@ -374,13 +411,21 @@ def _rrf_fuse(
         in_floor = cid in fmap
 
         # RRF score
+        # Anchored hits get 3x weight: when the user names a specific order,
+        # we're trusting the doc-level scope signal heavily over generic
+        # vector similarity. Without this boost, in-scope chunks lose to a
+        # single high-cosine cross-reference from a different doc, and
+        # body-paragraph chunks in long in-scope docs (where the literal
+        # answer-bearing prose lives) get squeezed out by TOC/header chunks
+        # that happen to have higher cosine to abstract questions.
+        ANCHORED_WEIGHT = 4.0
         score = 0.0
         if vrank is not None:
             score += 1.0 / (RRF_K_CONST + vrank)
         if krank is not None:
             score += 1.0 / (RRF_K_CONST + krank)
         if arank is not None:
-            score += 1.0 / (RRF_K_CONST + arank)
+            score += ANCHORED_WEIGHT / (RRF_K_CONST + arank)
         if in_floor and (vrank is None and krank is None and arank is None):
             score += 1.0 / (RRF_K_CONST + FLOOR_MAX)
 

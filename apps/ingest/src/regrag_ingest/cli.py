@@ -93,7 +93,12 @@ def run(manifest_path, corpus_root, skip_fetch, skip_parse, skip_chunk, skip_loa
             if not raw_path.exists():
                 log.error("missing raw PDF: %s", raw_path)
                 continue
-            parsed = parse_pdf(raw_path)
+            layout = (
+                "federal_register"
+                if entry.document_type == "federal_register_publication"
+                else None
+            )
+            parsed = parse_pdf(raw_path, layout=layout)
             out_path = parsed_dir / f"{entry.slug}.json"
             out_path.write_text(json.dumps(parsed_to_dict(parsed), indent=2))
             log.info(
