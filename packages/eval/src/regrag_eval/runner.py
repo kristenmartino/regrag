@@ -39,7 +39,10 @@ def run_one_question(
     expected_behavior = question["expected_behavior"]
     query = question["query"]
 
-    result = QuestionResult(id=qid, persona=persona, expected_behavior=expected_behavior)
+    result = QuestionResult(
+        id=qid, persona=persona, expected_behavior=expected_behavior,
+        category=question.get("category"),
+    )
 
     try:
         if mode == "baseline":
@@ -136,6 +139,7 @@ def report_to_dict(report: AggregateReport) -> dict:
                 "id": r.id,
                 "persona": r.persona,
                 "expected_behavior": r.expected_behavior,
+                "category": r.category,
                 "classification": r.classification,
                 "refusal_emitted": r.refusal_emitted,
                 "refusal_correct": r.refusal_correct,

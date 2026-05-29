@@ -63,6 +63,42 @@ The aggregate hides two question-level changes; both are minor and neither is a 
 
 The net is favorable — refusal accuracy +2.5pp, refusal precision +7.8pp, the canonical misattribution fixed — but the wrinkles are real and named here rather than smoothed over.
 
+## Answerability gate experiment (issue #3, 2026-05-29)
+
+**Motivation.** v6 surfaced `researcher-oos-002` (a retail-price jurisdiction question) flipping from refuse to a soft over-answer, and refusal calibration was the #1 named gap. Hypothesis: a dedicated pre-synthesis *answerability* check — a Haiku call judging whether the retrieved chunks actually support the question as asked — would catch out-of-scope questions the synthesizer's own `refused: true` self-flag misses, especially the hard ones that name an in-corpus order (so retrieval returns high-cosine chunks and naive relevance can't tell they're unanswerable).
+
+**Expanded test set.** The OOS set grew from 8 to 23 questions, tagged by *kind* of unanswerability so recall can be broken down by category (total eval set 40 → 55):
+
+| category | n | what it tests |
+|---|---|---|
+| `topic_absent` | 8 | topic simply not in corpus (rooftop solar, pipelines, cybersecurity) |
+| `false_premise` | 6 | names an in-corpus order but asks for a fact it doesn't establish ("how much must distribution utilities pay aggregators under Order 2222?") |
+| `order_conflation` | 5 | attributes one order's subject to another ("Order 841's interconnection queue reforms" — 841 is storage) |
+| `jurisdiction_boundary` | 4 | asks about something outside federal-wholesale scope (retail rates, net metering, GHG reporting) |
+
+**A/B result** (55 questions, `--no-judge`; the gate only adds refusals, so refusal metrics are what move):
+
+| Policy | Refusal precision | Refusal recall | False-refused in-scope | Refusal accuracy |
+|---|---|---|---|---|
+| Self-flag (gate off) | **90.9%** | 87.0% (20/23) | 2 | **90.9%** |
+| Gate, **all** queries | 63.9% | **100%** (23/23) | 13 | 76.4% |
+| Gate, **single_doc** only | 80.8% | 91.3% (21/23) | 5 | 89.1% |
+
+Gating *all* queries reaches 100% recall but collapses precision — it false-refuses 9 multi-doc synthesis questions, because on a cross-document question each retrieved chunk only partially covers the ask and the gate misreads distributed-but-present support as "unanswerable." Restricting the gate to `single_doc`-classified queries recovers most of that precision, but the real run still lands *below* the self-flag baseline on both accuracy (89.1% vs 90.9%) and precision (80.8% vs 90.9%) for a +4.3pp recall gain. (It's also sensitive to classifier error: two genuinely multi-doc researcher questions were mislabeled `single_doc`, so the gate ran and over-refused them.)
+
+**The decisive per-category finding:**
+
+| category | self-flag recall | gate (single_doc) recall |
+|---|---|---|
+| topic_absent | 7/8 | 7/8 |
+| false_premise | **6/6** | 6/6 |
+| order_conflation | **5/5** | 5/5 |
+| jurisdiction_boundary | 2/4 | 3/4 |
+
+The synthesizer's existing self-flag **already catches every false_premise and order_conflation question** — the exact categories the gate was built to catch. Handed chunks that don't support a false-premise or conflated question, the synthesizer already declines. The gate's *only* marginal contribution is one additional `jurisdiction_boundary` catch (2/4 → 3/4), bought at a ~10pp precision cost.
+
+**Conclusion — a negative result, documented not buried.** The answerability gate is **not worth enabling**. It ships behind `REGRAG_ANSWERABILITY_GATE` (default **off**) and is preserved as a documented experiment, the way the v4 structured-output verification is. The existing self-flag is better-calibrated than the issue assumed; the residual weakness is narrow (jurisdiction-boundary, 2/4) and a blanket answerability gate overcorrects it at a real cost to answerable questions. If jurisdiction calibration matters for a specific deployment, the right tool is a targeted scope/jurisdiction classifier, not a general answerability gate. The durable wins from this work are the **expanded 23-question OOS set** and the **per-category recall tagging**, which stay in the harness and make future refusal work measurable.
+
 ## Architecture change driving the CF gain
 
 The baseline verifier did one check: do the cited `chunk_id`s exist in the retrieved set? That catches hallucinated citations but doesn't catch *misattributed* citations — claims that point to a real chunk that just doesn't say what the model claims it says. The eval surfaced this as the dominant failure pattern (~30% of cited claims).

@@ -14,6 +14,7 @@ from typing import Iterator
 from langgraph.graph import END, START, StateGraph
 
 from ..audit.log import write_query_log
+from .nodes.answerability import answerability_gate
 from .nodes.classify import classify
 from .nodes.decompose import decompose
 from .nodes.retrieve import retrieve_parallel, retrieve_single
@@ -45,6 +46,7 @@ def build_graph():
     g.add_node("decompose", decompose)
     g.add_node("retrieve_single", retrieve_single)
     g.add_node("retrieve_parallel", retrieve_parallel)
+    g.add_node("answerability_gate", answerability_gate)
     g.add_node("synthesize", synthesize)
     g.add_node("verify", verify)
 
@@ -55,11 +57,17 @@ def build_graph():
     })
     g.add_edge("decompose", "retrieve_parallel")
 
-    # After retrieval, either refuse (skip synthesis) or synthesize
+    # After retrieval, either refuse (skip the rest) or pass to the answerability
+    # gate. The gate is a no-op pass-through unless REGRAG_ANSWERABILITY_GATE is
+    # set; when set, it may itself emit a refusal. Both conditionals reuse
+    # _check_pre_gen_refusal since it just inspects refusal_emitted.
     g.add_conditional_edges("retrieve_single", _check_pre_gen_refusal, {
-        "end": END, "synthesize": "synthesize",
+        "end": END, "synthesize": "answerability_gate",
     })
     g.add_conditional_edges("retrieve_parallel", _check_pre_gen_refusal, {
+        "end": END, "synthesize": "answerability_gate",
+    })
+    g.add_conditional_edges("answerability_gate", _check_pre_gen_refusal, {
         "end": END, "synthesize": "synthesize",
     })
 
