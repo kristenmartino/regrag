@@ -1,4 +1,4 @@
-# RegRAG eval set — 28 hand-crafted questions for measuring retrieval recall,
+# RegRAG eval set — hand-crafted questions for measuring retrieval recall,
 # citation faithfulness, and refusal accuracy.
 #
 # Schema per question:
@@ -13,8 +13,17 @@
 #   For refuse-expected:
 #     expected_refusal_reason: free-text gloss of why this is OOS (not used in scoring,
 #                              just for human review of false-positive answers)
+#     category: (OOS only) 'topic_absent' | 'false_premise' | 'order_conflation' |
+#               'jurisdiction_boundary' — tags the *kind* of unanswerability, so
+#               refusal recall can be broken down by category (added for issue #3).
 #
-# Distribution: 5 in-scope + 2 OOS per persona × 4 personas = 28 total.
+# History:
+#   - Original: 5 in-scope + 2 OOS per persona × 4 = 28 questions (8-doc corpus).
+#   - Tier-2 (2026-05-08): +12 in-scope for the 15-doc corpus expansion → 40.
+#   - Issue #3 (2026-05-29): +15 OOS questions in the harder categories
+#     (false_premise, order_conflation, jurisdiction_boundary) that name in-corpus
+#     orders, so naive retrieval returns high-cosine chunks and only a real
+#     answerability check refuses → 55 total, 23 of them OOS.
 
 questions:
   # ─────────── Compliance analyst (operational, mostly single-doc) ───────────
@@ -58,12 +67,14 @@ questions:
     expected_behavior: refuse
     query: "What are FERC's residential rooftop solar net-metering requirements?"
     expected_refusal_reason: "Net-metering is state jurisdiction; corpus does not address it."
+    category: topic_absent
 
   - id: compliance-oos-002
     persona: compliance_analyst
     expected_behavior: refuse
     query: "What cybersecurity standards must investor-owned utilities follow under FERC?"
     expected_refusal_reason: "Cybersecurity standards (NERC CIP) are out of corpus scope."
+    category: topic_absent
 
   # ─────────── Counsel at energy developer (interpretive, multi-doc) ───────────
   - id: counsel-001
@@ -106,12 +117,14 @@ questions:
     expected_behavior: refuse
     query: "How does FERC regulate natural gas pipeline construction permits?"
     expected_refusal_reason: "Pipeline construction (Section 7 NGA) is outside the electric corpus."
+    category: topic_absent
 
   - id: counsel-oos-002
     persona: counsel
     expected_behavior: refuse
     query: "What is FERC's position on EV charging infrastructure deployment incentives?"
     expected_refusal_reason: "EV charging deployment incentives are not addressed in the corpus."
+    category: topic_absent
 
   # ─────────── Federal agency staff (procedural, comments, single-doc) ───────────
   - id: fedstaff-001
@@ -154,12 +167,14 @@ questions:
     expected_behavior: refuse
     query: "What is FERC's annual budget appropriation for fiscal year 2025?"
     expected_refusal_reason: "Agency budget is administrative, not in regulatory corpus."
+    category: topic_absent
 
   - id: fedstaff-oos-002
     persona: federal_staff
     expected_behavior: refuse
     query: "Describe the FERC Office of Enforcement's investigation procedures for tariff violations."
     expected_refusal_reason: "Enforcement procedures are not the subject of the orders in corpus."
+    category: topic_absent
 
   # ─────────── Policy researcher (comparative, multi-doc, thematic) ───────────
   - id: researcher-001
@@ -202,12 +217,14 @@ questions:
     expected_behavior: refuse
     query: "How does FERC's regulatory approach compare to state PUC oversight of distribution utilities?"
     expected_refusal_reason: "Comparative state PUC analysis is out of corpus scope."
+    category: topic_absent
 
   - id: researcher-oos-002
     persona: researcher
     expected_behavior: refuse
     query: "What is the impact of FERC orders on retail consumer electricity prices?"
     expected_refusal_reason: "Retail price impact studies are not in the corpus."
+    category: topic_absent
 
   # ═══════════════════════════════════════════════════════════════════════════════
   # Tier-2 expansion (2026-05-08): 12 new questions exercising the corpus growth
@@ -306,3 +323,120 @@ questions:
     query: "How do the market design reforms in Order 825 (settlement intervals) relate to the participation models for storage in Order 841 and DERs in Order 2222?"
     expected_documents: ["20160616-3060", "20180228-3066", "20200917-3084"]
     expected_passages_keywords: ["settlement", "participation", "wholesale market"]
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # Issue #3 expansion (2026-05-29): harder OOS questions. Unlike the topic_absent
+  # set above (which names topics with no corpus presence), these name IN-CORPUS
+  # orders so naive retrieval returns high-cosine chunks — only a real answerability
+  # check should refuse. Three categories: false_premise, order_conflation,
+  # jurisdiction_boundary. All expected_behavior: refuse.
+  # ═══════════════════════════════════════════════════════════════════════════════
+
+  # ─────────── Compliance analyst ───────────
+  - id: compliance-oos-003
+    persona: compliance_analyst
+    expected_behavior: refuse
+    query: "What monetary penalty does Order 841 impose on an RTO that misses the storage participation compliance deadline?"
+    expected_refusal_reason: "Order 841 sets a compliance deadline but establishes no monetary penalty for missing it; the premise is false."
+    category: false_premise
+
+  - id: compliance-oos-004
+    persona: compliance_analyst
+    expected_behavior: refuse
+    query: "What does Order 745 require regarding electric storage resource participation models?"
+    expected_refusal_reason: "Order 745 (2011) is demand-response compensation; storage participation models are Order 841 (2018). Conflation."
+    category: order_conflation
+
+  - id: compliance-oos-005
+    persona: compliance_analyst
+    expected_behavior: refuse
+    query: "Under Order 841, what retail rate may a utility charge a customer for behind-the-meter storage?"
+    expected_refusal_reason: "Retail rates are state jurisdiction; Order 841 governs wholesale market participation, not retail rates."
+    category: jurisdiction_boundary
+
+  - id: compliance-oos-006
+    persona: compliance_analyst
+    expected_behavior: refuse
+    query: "Under Order 2222, how much must distribution utilities pay DER aggregators per megawatt-hour?"
+    expected_refusal_reason: "Order 2222 routes aggregator compensation through RTO/ISO markets; it sets no per-MWh payment from distribution utilities. False premise."
+    category: false_premise
+
+  # ─────────── Counsel ───────────
+  - id: counsel-oos-003
+    persona: counsel
+    expected_behavior: refuse
+    query: "How many megawatts of electric storage does Order 841 require each RTO to procure?"
+    expected_refusal_reason: "Order 841 removes participation barriers; it imposes no storage procurement quantity mandate. False premise."
+    category: false_premise
+
+  - id: counsel-oos-004
+    persona: counsel
+    expected_behavior: refuse
+    query: "What are Order 841's generator interconnection queue reforms?"
+    expected_refusal_reason: "Order 841 is electric-storage market participation; interconnection queue reform is Orders 845/2023. Conflation."
+    category: order_conflation
+
+  - id: counsel-oos-005
+    persona: counsel
+    expected_behavior: refuse
+    query: "Does Order 2222 give FERC authority to set retail net-metering rates for residential customers?"
+    expected_refusal_reason: "Retail net-metering is state jurisdiction; Order 2222 addresses wholesale market participation. Jurisdiction boundary."
+    category: jurisdiction_boundary
+
+  - id: counsel-oos-006
+    persona: counsel
+    expected_behavior: refuse
+    query: "Under Order 1920, what federal tax credit is available to transmission developers?"
+    expected_refusal_reason: "Order 1920 is transmission planning and cost allocation; it establishes no tax credit (those are IRA/IRS). False premise."
+    category: false_premise
+
+  # ─────────── Federal staff ───────────
+  - id: fedstaff-oos-003
+    persona: federal_staff
+    expected_behavior: refuse
+    query: "What capacity payment rate does Order 745 set for demand response resources?"
+    expected_refusal_reason: "Order 745 compensates demand response at LMP in the energy market; it sets no capacity payment rate. False premise."
+    category: false_premise
+
+  - id: fedstaff-oos-004
+    persona: federal_staff
+    expected_behavior: refuse
+    query: "What five-minute settlement interval requirements does Order 845 establish?"
+    expected_refusal_reason: "Order 845 is generator interconnection reform; five-minute settlement is Order 825. Conflation."
+    category: order_conflation
+
+  - id: fedstaff-oos-005
+    persona: federal_staff
+    expected_behavior: refuse
+    query: "What FERC commissioner confirmation process do these orders describe?"
+    expected_refusal_reason: "Commissioner confirmation is a Senate process, not a subject of these regulatory orders. Topic outside scope."
+    category: jurisdiction_boundary
+
+  # ─────────── Policy researcher ───────────
+  - id: researcher-oos-003
+    persona: researcher
+    expected_behavior: refuse
+    query: "What carbon-emissions reduction targets does Order 2222 establish for DER aggregations?"
+    expected_refusal_reason: "Order 2222 enables DER market participation; it sets no emissions-reduction targets. False premise."
+    category: false_premise
+
+  - id: researcher-oos-004
+    persona: researcher
+    expected_behavior: refuse
+    query: "How does Order 1000 regulate distributed energy resource aggregation in wholesale markets?"
+    expected_refusal_reason: "Order 1000 (2011) is regional transmission planning; DER aggregation is Order 2222 (2020). Conflation."
+    category: order_conflation
+
+  - id: researcher-oos-005
+    persona: researcher
+    expected_behavior: refuse
+    query: "What greenhouse-gas emissions reporting do these FERC orders require of generators?"
+    expected_refusal_reason: "GHG emissions reporting is EPA's domain; these orders (storage, DER, interconnection, planning, settlement) impose no such reporting. Topic outside scope."
+    category: jurisdiction_boundary
+
+  - id: researcher-oos-006
+    persona: researcher
+    expected_behavior: refuse
+    query: "What demand response compensation formula does Order 2023 adopt?"
+    expected_refusal_reason: "Order 2023 is generator interconnection; demand-response compensation is Order 745. Conflation."
+    category: order_conflation

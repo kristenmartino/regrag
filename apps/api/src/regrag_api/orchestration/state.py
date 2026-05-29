@@ -22,6 +22,7 @@ from typing import Any, Literal, TypedDict
 Classification = Literal["single_doc", "multi_doc"]
 RefusalReason = Literal[
     "no_relevant_chunks",      # pre-generation: top vector hit below threshold
+    "unanswerable_from_corpus",  # answerability gate: chunks don't support the question as asked
     "llm_refusal",             # generation model returned refused=true
     "llm_unavailable",         # upstream LLM call failed (outage, rate limit, network)
     "verification_unrecoverable",  # too many bad citations after max regens
@@ -80,6 +81,12 @@ class GraphState(TypedDict, total=False):
     # Refusal state
     refusal_emitted: bool
     refusal_reason: RefusalReason | None
+    # Answerability gate (flagged via REGRAG_ANSWERABILITY_GATE): when enabled,
+    # a Haiku call between retrieve and synthesize judges whether the retrieved
+    # chunks actually support the question as asked. Captured for audit/eval.
+    answerability_checked: bool          # True if the gate ran (flag on + not already refused)
+    answerability_verdict: bool | None   # the gate's answerable yes/no; None if it didn't run
+    answerability_reason: str | None     # the gate's one-line rationale
 
     # Bookkeeping
     regeneration_count: int
@@ -112,6 +119,9 @@ def initial_state(query: str, user_id: str | None = None) -> GraphState:
         synthesize_prompt=None,
         refusal_emitted=False,
         refusal_reason=None,
+        answerability_checked=False,
+        answerability_verdict=None,
+        answerability_reason=None,
         regeneration_count=0,
         timings={},
         model_ids_used={},

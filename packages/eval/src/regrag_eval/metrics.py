@@ -23,6 +23,7 @@ class QuestionResult:
     id: str
     persona: str
     expected_behavior: str
+    category: str | None = None  # OOS only: topic_absent | false_premise | order_conflation | jurisdiction_boundary
 
     # System output captured for scoring
     classification: str | None = None
