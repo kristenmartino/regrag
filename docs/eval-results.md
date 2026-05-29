@@ -213,6 +213,22 @@ The structural approach also dropped refusal accuracy 3.6 pp because the quote-v
 
 ---
 
+## Hybrid vs pure-vector retrieval (issue #5)
+
+CS §7 claimed hybrid retrieval (vector + keyword + identifier floor) beats pure vector on identifier-heavy queries. The matched baseline hinted otherwise, so this is the isolated measurement: a **retrieval-only** A/B (no synthesis) over the 32 answer-expected questions, comparing `hybrid_retrieve` against the baseline's `_pure_vector_topk`, scored with the same keyword-recall definition the eval uses. Harness: [`scripts/retrieval_ab.py`](../scripts/retrieval_ab.py).
+
+| Subset | n | Hybrid recall | Pure-vector recall | Δ |
+|---|---|---|---|---|
+| All answer questions | 32 | 94.8% | **96.9%** | −2.1pp |
+| identifier-heavy (query names an order/docket/§) | 30 | 94.4% | 96.7% | −2.2pp |
+| docket-number queries | 1 | 100% | 100% | tie |
+
+**The claim is not supported — hybrid is marginally *worse* on recall, not better.** The two paths return identical keyword recall on 31 of 32 questions; they differ on exactly one (`counsel-005`), where hybrid scores 0% vs pure-vector's 66.7% because doc-anchoring on "Order 841" floods the pool with 841-family chunks and drops the Order 2222 chunk that carried the keywords (the same artifact noted in the v6 wrinkles).
+
+Why pure vector keeps up: the corpus is small (17 docs) and the queries are semantically rich ("what does Order 2222 require for DER aggregation reporting?"), so vector search already pulls the right document into the top-10 — the identifier floor has nothing left to recover. The eval has essentially **one** pure docket-style query (`fedstaff-004`, RM21-17), too thin to show a difference. To actually stress the identifier floor you'd need identifier-only probes ("RM18-9-000" with no semantic content), which would be somewhat artificial.
+
+Two honest caveats on what this measures: (1) keyword-recall-at-10 can't see **ranking** improvements (identifier-matched chunk at rank 1 vs rank 8) — where the floor is designed to help — so this rules out a recall gain, not a ranking gain; (2) the separately-demonstrated **doc-anchored retrieval** win (the Order 841 effective-date fix in the v6 section) is a *different* mechanism and still stands. **Net for CS §7:** drop the "beats pure vector" framing; the identifier floor is cheap insurance that shows no measurable recall gain on this corpus. (Confirms the original review finding #8.)
+
 ## What the eval does not measure
 
 - **Factual accuracy of the answer text itself.** The judge scores whether each cited chunk supports the claim it's attached to; it does not separately assess whether the claim is correct. Claims with wrong attribution can still be factually right; claims with right attribution can still be wrong.

@@ -42,6 +42,8 @@ Findings from the multi-perspective review of the deliverable on 2026-05-22. Ite
 
 ### 10. Corpus is missing Order 841-A (the May 2019 rehearing of 841)
 
+**RESOLVED 2026-05-29:** Order 841-A (`20190516-3057`) + the Federal Register Order 841 (`fr-2018-03-06-2018-03708`) were ingested via column-aware parsing; corpus is now 17 docs. See the v6 citation-attribution work.
+
 **Observed:** Order 841 is in the corpus but its rehearing order (841-A, issued 2019-05-16) is not. 841-A changed substantive points on state opt-out and storage definitions.
 
 **Why deferred:** same eLibrary-SPA discovery problem as the rest of the corpus expansion. The URL isn't at a derivable `/sites/default/files/` path; Google searches don't turn it up. Would either need Playwright-driven eLibrary scraping or a third-party mirror like the wrightlaw Order 2023.
@@ -50,7 +52,9 @@ Findings from the multi-perspective review of the deliverable on 2026-05-22. Ite
 
 ---
 
-### 13. LLM-as-judge calibration vs human grader not measured
+### 13. LLM-as-judge calibration vs human grader
+
+**Tracked as:** [GitHub issue #6](https://github.com/kristenmartino/regrag/issues/6) — BLOCKED on the human-grading step.
 
 **Observed:** Sonnet is judging Sonnet-generated answers. Self-judging is a known calibration trap. eval-results.md acknowledges this but doesn't quantify it.
 
@@ -64,11 +68,15 @@ Findings from the multi-perspective review of the deliverable on 2026-05-22. Ite
 
 ### 21. No structured logging
 
+**Tracked as:** [GitHub issue #7](https://github.com/kristenmartino/regrag/issues/7).
+
 Current: `logging.basicConfig` with human-readable format. Railway logs are searchable but not queryable by field.
 
 What I'd want: JSON-structured logs with `query_id` linking the per-stage LLM calls to the audit row. Half-day of work; pays back the first time a weird production answer needs debugging.
 
 ### 33. Audit log still captures raw query in plaintext — only the disclaimer is in place
+
+**Tracked as:** [GitHub issue #9](https://github.com/kristenmartino/regrag/issues/9).
 
 Disclaimer now warns "**Do not paste confidential client information**" (shipped in batch 2 as #33b). But the underlying system still writes the raw query to Neon — no PII detection or scrubbing.
 
@@ -85,6 +93,8 @@ Defer: same as 33 — out of scope for portfolio, in scope for production.
 ## Deferred — surface polish
 
 ### 15. Audit log conflates production traffic with eval runs
+
+**Tracked as:** [GitHub issue #8](https://github.com/kristenmartino/regrag/issues/8).
 
 Same table, distinguished only by `user_id` ("eval-runner" vs other). A production /audit query for "how does CF drift over time?" would mix eval and real traffic.
 
