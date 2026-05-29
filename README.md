@@ -34,7 +34,7 @@ Python version is pinned in `.python-version` (currently 3.12.13). Set it up onc
 Each app has its own `pyproject.toml` and venv:
 
 ```bash
-# Ingest the seed corpus (15 FERC orders → Neon Postgres + pgvector)
+# Ingest the seed corpus (17 FERC documents → Neon Postgres + pgvector)
 cd apps/ingest
 python -m venv .venv && source .venv/bin/activate
 pip install -e .

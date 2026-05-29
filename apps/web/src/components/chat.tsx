@@ -251,7 +251,7 @@ function EmptyState({
     <div className="mx-auto max-w-2xl text-center">
       <h2 className="text-2xl font-semibold tracking-tight">Ask about FERC orders</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        The corpus is <strong>15 FERC orders spanning 2003–2024</strong>: interconnection (Orders 2003, 845, 845-A, 2023, 2023-A), transmission planning (Orders 1000, 1920 + RM21-17 ANOPR), distributed energy and storage (Orders 745, 841, 2222, 2222-A, 872), and market mechanics (Order 825). Single-document lookups go through Haiku; multi-document synthesis questions get decomposed and answered with Sonnet. Each stage of the pipeline streams live.
+        The corpus is <strong>17 FERC documents spanning 2003–2024</strong>: interconnection (Orders 2003, 845, 845-A, 2023, 2023-A), transmission planning (Orders 1000, 1920 + RM21-17 ANOPR), distributed energy and storage (Orders 745, 841, 841-A, 2222, 2222-A, 872), and market mechanics (Order 825) — including Order 841 in both its FERC-issued and Federal Register forms. Single-document lookups go through Haiku; multi-document synthesis questions get decomposed and answered with Sonnet. Each stage of the pipeline streams live.
       </p>
       <Card className="mt-4 border-amber-300/60 bg-amber-50 px-4 py-3 text-left text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/30 dark:text-amber-200">
         <strong>Demo only.</strong> Not legal advice and not for use in regulatory filings.
