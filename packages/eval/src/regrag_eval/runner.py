@@ -127,6 +127,8 @@ def report_to_dict(report: AggregateReport) -> dict:
             "retrieval_recall_macro": report.retrieval_recall_macro,
             "citation_faithfulness_macro": report.citation_faithfulness_macro,
             "refusal_accuracy": report.refusal_accuracy,
+            "refusal_precision": report.refusal_precision,
+            "refusal_recall": report.refusal_recall,
         },
         "by_persona": report.by_persona,
         "by_question": [

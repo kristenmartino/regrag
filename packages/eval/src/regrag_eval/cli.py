@@ -114,6 +114,8 @@ def run(eval_set_path, id_filter, persona, no_judge, baseline, out_dir):
     s = report
     click.echo(f"Questions: {s.n_questions} ({s.n_errors} errored)")
     click.echo(f"Refusal accuracy:        {_pct(s.refusal_accuracy)}")
+    click.echo(f"  refusal precision:     {_pct(s.refusal_precision)}  (of refusals, how many were correct)")
+    click.echo(f"  refusal recall:        {_pct(s.refusal_recall)}  (of should-refuse, how many we caught)")
     click.echo(f"Retrieval recall:        {_pct(s.retrieval_recall_macro)}  (answer-expected only)")
     click.echo(f"Citation faithfulness:   {_pct(s.citation_faithfulness_macro)}  (LLM-as-judge)")
     click.echo("\nPer persona:")
