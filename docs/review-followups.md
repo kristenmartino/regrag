@@ -54,7 +54,7 @@ Findings from the multi-perspective review of the deliverable on 2026-05-22. Ite
 
 ### 13. LLM-as-judge calibration vs human grader
 
-**Tracked as:** [GitHub issue #6](https://github.com/kristenmartino/regrag/issues/6) — BLOCKED on the human-grading step. not measured
+**Tracked as:** [GitHub issue #6](https://github.com/kristenmartino/regrag/issues/6) — BLOCKED on the human-grading step.
 
 **Observed:** Sonnet is judging Sonnet-generated answers. Self-judging is a known calibration trap. eval-results.md acknowledges this but doesn't quantify it.
 
