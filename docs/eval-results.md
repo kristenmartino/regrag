@@ -1,8 +1,9 @@
 # RegRAG Evaluation Results
 
-Latest production run: **2026-05-09** (v5) against the **40-question** expanded eval set covering all 15 corpus documents. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge).
+Latest production run: **2026-05-29** (v6) against the **40-question** eval set, now over a **17-document** corpus. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge). v6 adds the citation-attribution hardening from the post-review pass: document-anchored retrieval (per-accession quota + per-accession RRF), the per-sentence accession-scope verifier, and two new Order 841 sources (the rehearing Order 841-A and the Federal Register publication carrying the literal effective date).
 
 Raw reports:
+- [eval-20260529-144731.json](../packages/eval/results/eval-20260529-144731.json) — **v6** (40 questions, 17-doc corpus, doc-anchored retrieval + scope verifier)
 - [eval-20260509-041345.json](../packages/eval/results/eval-20260509-041345.json) — **v5** (40 questions, post corpus expansion to 15 docs)
 - [eval-20260508-184200.json](../packages/eval/results/eval-20260508-184200.json) — **v2/v3** (28 questions, 8-doc corpus, inline judge)
 - [eval-20260508-203704.json](../packages/eval/results/eval-20260508-203704.json) — **v4** (structured-output synthesis + quote verification; reverted, see "What didn't work" below)
@@ -12,19 +13,21 @@ Raw reports:
 
 ---
 
-## Headline metrics (v5, 40 questions, 15-doc corpus)
+## Headline metrics (v6, 40 questions, 17-doc corpus)
 
-| Metric | Score | Methodology |
-|---|---|---|
-| **Retrieval recall** | **96.9%** | Macro-averaged over 30 answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
-| **Refusal accuracy** | **90.0%** | 36 of 40 questions correctly refused-when-OOS or answered-when-in-scope |
-| **Refusal precision** | **70.0%** | Of 10 refusals, 7 were correct (3 false positives on should-have-answered questions) |
-| **Refusal recall** | **87.5%** | Of 8 should-refuse questions, 7 were refused (1 false negative — a borderline OOS question got a hedged answer) |
-| **Citation faithfulness** | **95.4%** | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
+| Metric | Score | v5 → v6 | Methodology |
+|---|---|---|---|
+| **Retrieval recall** | **95.8%** | 96.9% → 95.8% (−1.1pp) | Macro-averaged over answer-expected questions: fraction of the question's `expected_passages_keywords` that appear (case-insensitive substring) in any retrieved chunk |
+| **Refusal accuracy** | **92.5%** | 90.0% → 92.5% (+2.5pp) | 37 of 40 questions correctly refused-when-OOS or answered-when-in-scope |
+| **Refusal precision** | **77.8%** | 70.0% → 77.8% (+7.8pp) | Of 9 refusals, 7 were correct (2 false positives on should-have-answered questions) |
+| **Refusal recall** | **87.5%** | 87.5% → 87.5% (flat) | Of 8 should-refuse questions, 7 were refused (1 false negative — see below) |
+| **Citation faithfulness** | **94.8%** | 95.4% → 94.8% (−0.6pp) | LLM-as-judge (Sonnet, offline) scores each `[[chunk_id]]` citation against the chunk it's attributed to; macro-averaged over all cited claims |
 
-The precision/recall split (added in review pass #17) is more honest than the headline accuracy. The two baselines below both score ~71% refusal accuracy not because they correctly refuse OOS questions — they don't refuse anything ever — but because they correctly answer the 30 should-answer questions, which makes the binary accuracy look respectable. Splitting precision/recall exposes that.
+**Honest read of the v5 → v6 delta.** The aggregate moved within noise on the citation/recall axes and improved on refusal. The CF dip (−0.6pp) is inside the run-to-run variance of a non-deterministic Sonnet judge — at the question level CF rose on five questions and fell on five; nothing systematic. Refusal accuracy and precision both improved. The recall dip (−1.1pp) is **one question** — `counsel-005` — and is a metric artifact, not a behavior change (detail below). The headline functional win isn't in this table: the canonical citation-misattribution case ("effective date of Order 841") now answers with the literal date **June 4, 2018** cited to Order 841's own Federal Register text, verified in production — see "Citation-attribution hardening (v6)" below.
 
-For reference, v3 on the original 28-question set hit 89.3% refusal / 98.3% recall / 91.2% CF. **These are not directly comparable to v5** — different eval sets, different corpora — but the order-of-magnitude consistency (both runs ~90% refusal, both >90% CF after the inline judge) suggests the architecture generalizes rather than overfits to the original test bank.
+The precision/recall split is more honest than the headline accuracy. The two baselines below both score ~71% refusal accuracy not because they correctly refuse OOS questions — they don't refuse anything ever — but because they correctly answer the should-answer questions, which makes the binary accuracy look respectable. Splitting precision/recall exposes that.
+
+For reference, v3 on the original 28-question set hit 89.3% refusal / 98.3% recall / 91.2% CF. **These are not directly comparable to v6** — different eval sets, different corpora — but the order-of-magnitude consistency suggests the architecture generalizes rather than overfits to the original test bank.
 
 **Important methodological caveat for the headline numbers:** all 40 questions were authored by the same person who designed the system, so the eval exercises queries the system is biased toward handling well. The numbers should be read as "this is what the system does on author-curated questions"; real-user query distributions will look different. See "What the eval does not measure" below for the full list of confounds.
 
@@ -32,14 +35,33 @@ For reference, v3 on the original 28-question set hit 89.3% refusal / 98.3% reca
 
 | Persona | n | Refusal | Recall | Citation faithfulness |
 |---|---|---|---|---|
-| compliance_analyst | 10 | 90.0% | 95.8% | 95.2% |
-| counsel | 10 | 80.0% | 95.8% | 92.9% |
-| federal_staff | 10 | 90.0% | 95.8% | **97.6%** |
-| **researcher** | 10 | **100%** | **100%** | **95.9%** |
+| **compliance_analyst** | 10 | **100%** | **100%** | **98.2%** |
+| counsel | 10 | 90.0% | 87.5% | 94.4% |
+| federal_staff | 10 | 90.0% | 95.8% | 94.0% |
+| researcher | 10 | 90.0% | **100%** | 92.4% |
 
-The researcher persona — which was the weakest in the v1 baseline (71% refusal, 65% CF) — now hits **100% on refusal AND retrieval recall, with 95.9% CF**. The new evolution-style questions (`researcher-006/007/008`) all worked cleanly. The 30+ pp gains here over the v1 baseline come from the combination of (a) the inline LLM judge added in v2/v3 and (b) richer corpus context that gives the system more material to ground claims in.
+compliance_analyst is now the strongest persona (100% refusal and recall, 98.2% CF) — its single-document obligation-lookup questions are exactly what doc-anchored retrieval helps most. counsel is the weakest on recall (87.5%), pulled down entirely by `counsel-005` (the D.C. Circuit question — see below). The researcher persona dropped from v5's 100% refusal to 90% because of `researcher-oos-002` flipping to a (soft) answer; its recall stayed at 100%.
 
-The counsel persona slipped 5.7 pp on refusal (from 85.7% on 28-q to 80% on 40-q): one of the new counsel questions (probably `counsel-006` on the Order 2003 → Order 2023 evolution) over-refused. Worth a closer look but not blocking.
+## Citation-attribution hardening (v6)
+
+v6 targets one specific, demonstrated failure: when a query names an order, the retriever could surface chunks that *reference* that order from a different document and the synthesizer would cite them as if they were *from* the named order. The canonical case — "What was the effective date of Order 841?" — cited Order 845-A (a different rulemaking that mentions 841's deadline in passing) and never stated an actual date.
+
+Three coordinated changes:
+
+1. **Document-anchored retrieval** — when `extract_identifiers` finds a named order, a separate vector search restricted to that order's accession(s) joins the RRF pool, with a **per-accession quota** (each in-scope accession gets its own top-K slots) and **per-accession RRF ranking** (each accession's #1 contributes equal weight, so a third in-scope source isn't buried at global rank 13). [`retrieval/hybrid.py`](../apps/api/src/regrag_api/retrieval/hybrid.py)
+2. **Per-sentence accession-scope verifier** — post-synthesis, for each sentence whose subject is the named order, the *first* citation must be from an in-scope accession; out-of-scope first-citations are stripped (a later in-scope citation promotes) or the sentence is dropped. [`verification/scope.py`](../apps/api/src/regrag_api/verification/scope.py)
+3. **Two new Order 841 sources** — the rehearing **Order 841-A** (`20190516-3057`) and the **Federal Register** publication (`fr-2018-03-06-2018-03708`), the latter parsed with column-aware extraction so its "effective June 4, 2018" paragraph survives as clean text. (Closes the deferred "corpus missing 841-A" review finding.)
+
+**Result, verified in production:** the canonical query now answers *"Order 841 was issued on February 15, 2018 `[[20180228-3066:c0000]]`. According to the Federal Register publication of the Final Rule, the effective date was June 4, 2018 `[[fr-2018-03-06-2018-03708:c0274]]`."* — both citations in the Order 841 family, the literal correct date, no 845-A misattribution.
+
+### The two question-level wrinkles (honest accounting)
+
+The aggregate hides two question-level changes; both are minor and neither is a behavior regression caused by the verifier:
+
+- **`counsel-005` ("Did the D.C. Circuit uphold Order 841, and on what grounds?"): recall 0.667 → 0.0.** This is the entire −1.1pp aggregate recall drop. It is a **retrieval-metric artifact, not a behavior change** — the question refuses in *both* v5 and v6 (it refused in the baseline too). What changed: anchoring on "Order 841" now floods the top-10 with the three 841-family documents, displacing the Order 2222 chunk that previously contributed the keyword hits the recall metric counts. Compounding it, the question is partly unanswerable from the corpus: the D.C. Circuit opinion (*NARUC v. FERC*, July 2020) **isn't in the corpus**, so "on what grounds" was never fully groundable. Refusing it is arguably the *correct* regulated-domain behavior. Two honest fixes exist (lighten anchoring on multi-doc/cross-order queries, or add the court opinion to the corpus); neither is blocking.
+- **`researcher-oos-002` ("impact of FERC orders on retail consumer electricity prices?"): refused → answered.** A genuine but soft over-answer regression. The corpus addresses *wholesale* markets, not *retail* consumer prices; the right behavior is to decline. v6 instead pivots to grounded wholesale/Order 745 LMP content rather than refusing the retail question — the answer is faithfully cited, just off-target. Likely a side-effect of the K 8→10 retrieval bump giving the synthesizer enough material to attempt an answer. This is the precision/recall tension the doc-anchored change surfaces: more aggressive retrieval lowers refusal precision on borderline-OOS questions.
+
+The net is favorable — refusal accuracy +2.5pp, refusal precision +7.8pp, the canonical misattribution fixed — but the wrinkles are real and named here rather than smoothed over.
 
 ## Architecture change driving the CF gain
 
@@ -49,7 +71,9 @@ The new verifier adds a second step. After the chunk-id presence check passes, a
 
 Code: [`apps/api/src/regrag_api/verification/substantive.py`](../apps/api/src/regrag_api/verification/substantive.py). Wired into the verify node in [`nodes/verify.py`](../apps/api/src/regrag_api/orchestration/nodes/verify.py).
 
-## Refusal shifts vs. baseline
+## Refusal shifts (historical: v5 vs. v1 baseline)
+
+*This section documents the v1 → v5 verifier transition and is kept for history; the v5 → v6 shifts are covered under "Citation-attribution hardening (v6)" above.*
 
 Same 89.3% in aggregate, but four questions changed behavior:
 
