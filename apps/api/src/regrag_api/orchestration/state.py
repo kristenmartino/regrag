@@ -25,7 +25,8 @@ RefusalReason = Literal[
     "unanswerable_from_corpus",  # answerability gate: chunks don't support the question as asked
     "llm_refusal",             # generation model returned refused=true
     "llm_unavailable",         # upstream LLM call failed (outage, rate limit, network)
-    "verification_unrecoverable",  # too many bad citations after max regens
+    "verification_unrecoverable",  # unsupported/uncited content after the regen budget is exhausted
+    "verification_unavailable",    # substantive judge outage / parse failure — verifier could not complete
 ]
 
 
