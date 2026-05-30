@@ -12,7 +12,7 @@ import time
 from dataclasses import asdict
 from typing import Iterable
 
-from ...retrieval.hybrid import RetrievedChunk, hybrid_retrieve
+from ...retrieval.hybrid import RetrievedChunk, anchored_roles_for, hybrid_retrieve
 from ...retrieval.identifiers import extract_identifiers, identifier_terms
 from ..state import GraphState
 
@@ -92,6 +92,10 @@ def _retrieve_for_queries(
     anchored_accessions = sorted({
         c.accession_number for c in all_chunks if c.anchored_match
     })
+    # Role-split the named orders' accessions (issue #14): primary / Federal Register /
+    # rehearing, so the scope verifier and SCOPE prompt stop treating a rehearing order
+    # as a primary-order source. Built from the documents metadata in the retrieval layer.
+    anchored_roles = anchored_roles_for(named_orders)
 
     refusal_emitted = top_cosine < COSINE_REFUSAL_THRESHOLD
     refusal_reason = "no_relevant_chunks" if refusal_emitted else None
@@ -112,6 +116,7 @@ def _retrieve_for_queries(
         "top_cosine_sim": top_cosine,
         "named_orders": named_orders,
         "anchored_accessions": anchored_accessions,
+        "anchored_roles": anchored_roles,
         "refusal_emitted": refusal_emitted,
         "refusal_reason": refusal_reason,
         "timings": timings,

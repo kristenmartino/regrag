@@ -102,3 +102,72 @@ def identifier_terms(identifiers: dict[str, list[str]] | None) -> set[str]:
     if not identifiers:
         return set()
     return {term for terms in identifiers.values() for term in terms}
+
+
+# ─── Role semantics for anchored accessions (issue #14) ───
+ROLE_PRIMARY = "primary"
+ROLE_FEDERAL_REGISTER = "federal_register"
+ROLE_REHEARING = "rehearing"
+
+_REHEARING_SUFFIX_RE = re.compile(r"-[A-Za-z]+$")
+
+
+def is_rehearing_order(order: str) -> bool:
+    """True if the order id carries a rehearing suffix (e.g. '841-A', '2222-A')."""
+    return bool(_REHEARING_SUFFIX_RE.search(order))
+
+
+def build_anchored_roles(
+    named_orders: list[str],
+    role_map: dict[str, list[tuple[str, str]]],
+) -> dict[str, dict[str, list[str]]]:
+    """Group each named order's accessions by ROLE (issue #14).
+
+    Args:
+        named_orders: order numbers in play (e.g. ["841", "841-A"]).
+        role_map: order_number → [(accession_number, document_type)] from the
+            documents metadata.
+
+    Returns {order: {"primary": [...], "federal_register": [...], "rehearing": [...]}}:
+      primary           = final_rule docs with that exact order_number
+      federal_register  = federal_register_publication docs with that order_number
+      rehearing         = rehearing_order docs that ARE this order, PLUS the rehearings
+                          OF this order (order_number startswith N + '-')
+    """
+    roles: dict[str, dict[str, list[str]]] = {}
+    for n in named_orders:
+        primary: list[str] = []
+        federal_register: list[str] = []
+        rehearing: list[str] = []
+        for acc, doc_type in role_map.get(n, []):
+            if doc_type == "final_rule":
+                primary.append(acc)
+            elif doc_type == "federal_register_publication":
+                federal_register.append(acc)
+            elif doc_type == "rehearing_order":
+                rehearing.append(acc)
+        # Rehearings OF this order (e.g. 841 → 841-A), folded in for context.
+        for other, entries in role_map.items():
+            if other != n and other.startswith(n + "-"):
+                for acc, _doc_type in entries:
+                    if acc not in rehearing:
+                        rehearing.append(acc)
+        roles[n] = {
+            ROLE_PRIMARY: primary,
+            ROLE_FEDERAL_REGISTER: federal_register,
+            ROLE_REHEARING: rehearing,
+        }
+    return roles
+
+
+def primary_citation_accessions(
+    order: str, anchored_roles: dict[str, dict[str, list[str]]]
+) -> list[str]:
+    """The accessions allowed as the PRIMARY (first) citation for a sentence whose
+    subject is `order` (issue #14): the rehearing accessions if `order` is itself a
+    rehearing, otherwise the primary + Federal-Register accessions — NEVER the
+    rehearing, which is a separate document."""
+    role = anchored_roles.get(order) or {}
+    if is_rehearing_order(order):
+        return list(role.get(ROLE_REHEARING, []))
+    return list(role.get(ROLE_PRIMARY, [])) + list(role.get(ROLE_FEDERAL_REGISTER, []))

@@ -29,6 +29,8 @@ import logging
 import re
 from dataclasses import dataclass, field
 
+from ..retrieval.identifiers import primary_citation_accessions
+
 log = logging.getLogger(__name__)
 
 # Match a citation marker and capture both the full citation and the accession
@@ -55,26 +57,29 @@ class ScopeResult:
 def check_accession_scope(
     draft: str,
     named_orders: list[str],
-    anchored_accessions: list[str],
+    anchored_roles: dict[str, dict[str, list[str]]],
     *,
     regeneration_count: int = 0,
 ) -> ScopeResult:
-    """Walk the draft sentence-by-sentence and enforce the in-scope rule.
+    """Walk the draft sentence-by-sentence and enforce the role-aware in-scope rule.
 
     Args:
         draft: the verified-citations text from the previous verification step.
         named_orders: order numbers extracted from the query (e.g. ["841"]).
-        anchored_accessions: accessions for those orders (e.g. ["20180228-3066"]).
+        anchored_roles: per-order accessions grouped by role (issue #14):
+            {order: {"primary": [...], "federal_register": [...], "rehearing": [...]}}.
+            The in-scope set is computed PER SENTENCE-SUBJECT — a primary-order subject's
+            first citation must be a primary/Federal-Register accession (NOT a rehearing);
+            a rehearing subject's must be the rehearing.
         regeneration_count: current regen attempt; used to decide regen vs strip.
 
     Returns:
         ScopeResult with cleaned_text and stripping/regen decisions.
     """
-    if not named_orders or not anchored_accessions:
+    if not named_orders or not anchored_roles:
         # Rule doesn't apply — nothing to check.
         return ScopeResult(cleaned_text=draft, notes="no named order in query")
 
-    in_scope = set(anchored_accessions)
     order_patterns = _build_order_patterns(named_orders)
     sentences = _split_sentences(draft)
 
@@ -85,10 +90,16 @@ def check_accession_scope(
     violating = 0
 
     for sent in sentences:
-        # Does this sentence have a named order as subject?
-        if not _is_subject_of_named_order(sent, order_patterns):
+        # Which named order (if any) is this sentence's subject?
+        subject = _subject_order(sent, order_patterns)
+        if subject is None:
             new_sentences.append(sent)
             continue
+
+        # Role-aware in-scope set for THIS subject (issue #14): a primary-order
+        # subject's first citation must be a primary or Federal-Register source, not a
+        # rehearing; a rehearing subject's must be the rehearing.
+        in_scope = set(primary_citation_accessions(subject, anchored_roles))
 
         checked += 1
         cites = list(_CITATION_RE.finditer(sent))
@@ -185,37 +196,37 @@ def _split_sentences(text: str) -> list[str]:
     return _SENTENCE_SPLIT_RE.split(text)
 
 
-def _build_order_patterns(named_orders: list[str]) -> list[re.Pattern]:
-    """For each order number, build a regex that matches it as a token (not
-    inside a longer number). Matches 'Order 841', 'Order No. 841', '841' as
-    a standalone, but not '8410' or '12-841-A'.
-
-    For 'Order 841-A' style identifiers, the hyphen is part of the token so
-    we match '841-A' as a unit.
+def _build_order_patterns(named_orders: list[str]) -> list[tuple[str, re.Pattern]]:
+    """For each order number, build (order, regex) where the regex matches it as a
+    token (not inside a longer number): 'Order 841', 'Order No. 841', '841' as a
+    standalone, but not '8410'. The boundary lookarounds block '841' from matching
+    inside '841-A', so primary and rehearing orders stay distinguishable.
     """
     patterns = []
     for o in named_orders:
-        # Escape the order ID and require it to be bounded by non-alnum/non-dash
-        # on either side. Use lookarounds so the boundary isn't consumed.
         escaped = re.escape(o)
-        patterns.append(re.compile(rf"(?<![A-Za-z0-9-]){escaped}(?![A-Za-z0-9-])"))
+        patterns.append((o, re.compile(rf"(?<![A-Za-z0-9-]){escaped}(?![A-Za-z0-9-])")))
     return patterns
 
 
-def _is_subject_of_named_order(sentence: str, order_patterns: list[re.Pattern]) -> bool:
-    """Heuristic: a sentence has a named-order subject if the order number
-    appears within the first 80 characters (typically the subject area).
+def _subject_order(sentence: str, order_patterns: list[tuple[str, re.Pattern]]) -> str | None:
+    """Heuristic subject detection (issue #14): return the named order whose token
+    appears EARLIEST within the first 80 characters (the subject area), or None.
+    Returning WHICH order — not just whether one matched — lets the caller pick the
+    role-appropriate in-scope set (primary/FR vs rehearing).
 
-    This is intentionally lenient — false positives (sentences that *mention*
-    the order in their first 80 chars but whose grammatical subject is something
-    else) cause the in-scope rule to be applied where it wasn't strictly needed,
-    which is a soft-fail (some compliant cites get incorrectly required to come
-    from in-scope accessions). False negatives (subject is the named order but
-    its name appears past char 80) skip the check, which is the silent-failure
-    we already had pre-fix.
+    Intentionally lenient: a false positive applies the rule where it wasn't strictly
+    needed (soft-fail); a false negative (subject past char 80) skips the check, the
+    pre-existing silent gap.
     """
     head = sentence[:80]
-    return any(p.search(head) for p in order_patterns)
+    best: str | None = None
+    best_pos: int | None = None
+    for order, pat in order_patterns:
+        m = pat.search(head)
+        if m and (best_pos is None or m.start() < best_pos):
+            best, best_pos = order, m.start()
+    return best
 
 
 def _tidy_punctuation(text: str) -> str:
