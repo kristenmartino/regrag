@@ -204,6 +204,10 @@ documents:
     issue_date: "2020-07-16"
     title: "Qualifying Facility Rates and Requirements; Implementation Issues Under PURPA"
     ferc_cite: "172 FERC ¶ 61,041"
+    # NOTE (#15): FERC hosts this PDF under a filename referencing docket RM20-15-000, which does
+    # NOT match Order 872's actual docket (RM19-15-000 / AD16-16-000 above). The URL is intentionally
+    # retained — it is the working FERC-hosted PDF (HEAD 200, size matches); RM19-15-000.pdf 404s.
+    # The docket_numbers above are the authoritative identifier.
     pdf_url: "https://www.ferc.gov/sites/default/files/2020-06/RM20-15-000.pdf"
     pdf_size_bytes: 279013
     notes: "PURPA modernization for qualifying facilities (small DERs). Adjacent to Orders 745 + 2222 for distributed-resource policy questions."
@@ -228,29 +232,9 @@ documents:
 # Each adds material breadth to the corpus and supports specific case-study questions.
 
 todo_documents:
-  - order_number: "2023"
-    docket_numbers: ["RM22-14-000"]
-    document_type: "final_rule"
-    issue_date: "2023-07-28"
-    title: "Improvements to Generator Interconnection Procedures and Agreements"
-    ferc_cite: "184 FERC ¶ 61,054"
-    notes: "Major 2023 interconnection reform; would support questions about interconnection evolution"
-
-  - order_number: "2023-A"
-    docket_numbers: ["RM22-14-001"]
-    document_type: "rehearing_order"
-    issue_date: "2024-03-21"
-    title: "Improvements to Generator Interconnection Procedures and Agreements — Order on Rehearing"
-    notes: "Rehearing of Order 2023"
-
-  - order_number: "1920"
-    docket_numbers: ["RM21-17-000"]
-    document_type: "final_rule"
-    issue_date: "2024-05-13"
-    title: "Building for the Future Through Electric Regional Transmission Planning and Cost Allocation"
-    ferc_cite: "187 FERC ¶ 61,068"
-    notes: "Major 2024 transmission planning reform; pairs with the RM21-17 ANOPR already in seed"
-
+  # Removed 2026-05-30 (#15): Orders 1920, 2023, 2023-A are already ingested in the `documents`
+  # block above and no longer belong here. The entries below remain pending only because their
+  # pdf_url isn't yet discoverable (see the discovery note above the todo list).
   - order_number: "1920-A"
     docket_numbers: ["RM21-17-001"]
     document_type: "rehearing_order"
