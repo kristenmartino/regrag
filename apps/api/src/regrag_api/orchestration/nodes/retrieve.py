@@ -13,7 +13,7 @@ from dataclasses import asdict
 from typing import Iterable
 
 from ...retrieval.hybrid import RetrievedChunk, hybrid_retrieve
-from ...retrieval.identifiers import extract_identifiers
+from ...retrieval.identifiers import extract_identifiers, identifier_terms
 from ..state import GraphState
 
 log = logging.getLogger(__name__)
@@ -42,10 +42,31 @@ def _retrieve_for_queries(
     queries: list[str], state: GraphState, *, stage_name: str
 ) -> dict:
     t0 = time.perf_counter()
+
+    # Issue #13: if decomposition dropped any identifier the user named in the
+    # ORIGINAL query, those identifiers never reach anchoring/floor on the multi-doc
+    # path. Detect that across ALL identifier classes (orders, dockets, citations)
+    # and only then add the original query to the retrieval set so its identifiers
+    # are seen. The stored sub_queries (audit/UI) are left untouched — only the
+    # retrieval set is augmented. (On the single-doc path `queries` already IS the
+    # original query, so the subset check holds and nothing is added.)
+    original_terms = identifier_terms(state.get("original_identifiers"))
+    query_terms: set[str] = set()
+    for q in queries:
+        query_terms |= set(extract_identifiers(q).all_terms)
+    effective_queries = list(queries)
+    if original_terms and not original_terms.issubset(query_terms):
+        log.info(
+            "%s: original-query identifiers %s dropped by decomposition → adding original query to retrieval",
+            stage_name, sorted(original_terms - query_terms),
+        )
+        effective_queries.insert(0, state["query"])
+    effective_queries = list(dict.fromkeys(effective_queries))  # dedupe, preserve order
+
     all_chunks: list[RetrievedChunk] = []
     seen: set[str] = set()
     top_cosine = 0.0
-    for q in queries:
+    for q in effective_queries:
         results = hybrid_retrieve(q, k=PER_QUERY_K)
         for r in results:
             if r.chunk_id in seen:
@@ -58,9 +79,16 @@ def _retrieve_for_queries(
     # Convert to serializable dicts for state (audit log will snapshot these)
     chunks_serializable = [_to_dict(c) for c in all_chunks]
 
-    # Derive named-order metadata so synthesize can prefer same-accession citations
-    # when the user named a specific order (review finding #9).
-    named_orders = sorted({o for q in queries for o in extract_identifiers(q).orders})
+    # Effective named orders = orders named in the ORIGINAL query, unioned with
+    # orders present in the (possibly augmented) retrieval queries (review finding #9
+    # + #13). The union guarantees an original-query order survives even if
+    # decomposition dropped it. NOTE (deferred to #14): role semantics — primary
+    # order vs rehearing vs Federal Register companion — are NOT modeled here; this
+    # only preserves the identifier. A named order absent from the corpus produces no
+    # anchored chunks and behaves as today (no fabricated in-scope backing).
+    original_orders = (state.get("original_identifiers") or {}).get("orders") or []
+    effective_query_orders = {o for q in effective_queries for o in extract_identifiers(q).orders}
+    named_orders = sorted(set(original_orders) | effective_query_orders)
     anchored_accessions = sorted({
         c.accession_number for c in all_chunks if c.anchored_match
     })
@@ -73,8 +101,8 @@ def _retrieve_for_queries(
     timings[stage_name] = elapsed_ms
 
     log.info(
-        "%s: %d queries → %d unique chunks, top_cosine=%.3f%s, in %dms",
-        stage_name, len(queries), len(all_chunks), top_cosine,
+        "%s: %d queries (%d effective) → %d unique chunks, top_cosine=%.3f%s, in %dms",
+        stage_name, len(queries), len(effective_queries), len(all_chunks), top_cosine,
         " [REFUSE]" if refusal_emitted else "",
         elapsed_ms,
     )
