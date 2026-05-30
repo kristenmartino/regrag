@@ -52,6 +52,16 @@ class ExtractedIdentifiers:
     def is_empty(self) -> bool:
         return not any([self.orders, self.dockets, self.ferc_cites, self.usc_cites, self.cfr_cites])
 
+    def as_dict(self) -> dict[str, list[str]]:
+        """Serialize to a plain dict for GraphState (issue #13). Audit-serializable."""
+        return {
+            "orders": self.orders,
+            "dockets": self.dockets,
+            "ferc_cites": self.ferc_cites,
+            "usc_cites": self.usc_cites,
+            "cfr_cites": self.cfr_cites,
+        }
+
 
 def extract_identifiers(text: str) -> ExtractedIdentifiers:
     """Pull all FERC regulatory identifiers from a query or chunk."""
@@ -82,3 +92,13 @@ def _dedupe_preserving_order(items) -> list[str]:
             seen.add(item)
             out.append(item)
     return out
+
+
+def identifier_terms(identifiers: dict[str, list[str]] | None) -> set[str]:
+    """Flatten a serialized identifiers dict (ExtractedIdentifiers.as_dict()) to the
+    set of all identifier terms across every class. None/empty → empty set. Used by
+    retrieval to detect whether decomposition dropped any original-query identifier
+    (issue #13)."""
+    if not identifiers:
+        return set()
+    return {term for terms in identifiers.values() for term in terms}
