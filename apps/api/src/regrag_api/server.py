@@ -24,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from .audit_auth import audit_auth
 from .orchestration.graph import run as run_graph
 from .orchestration.graph import run_streaming
 from .rate_limit import audit_limit, chat_limit
@@ -180,7 +181,7 @@ def _get_audit_conn() -> psycopg.Connection:
     return psycopg.connect(url)
 
 
-@app.get("/audit", response_model=list[AuditRowSummary], dependencies=[Depends(audit_limit)])
+@app.get("/audit", response_model=list[AuditRowSummary], dependencies=[Depends(audit_auth), Depends(audit_limit)])
 def audit_list(
     limit: int = Query(default=50, ge=1, le=200),
     user_id: str | None = Query(default=None, description="Filter by user_id (e.g. 'eval-runner')"),
@@ -225,7 +226,7 @@ def audit_list(
     ]
 
 
-@app.get("/audit/{query_id}", response_model=AuditRowDetail, dependencies=[Depends(audit_limit)])
+@app.get("/audit/{query_id}", response_model=AuditRowDetail, dependencies=[Depends(audit_auth), Depends(audit_limit)])
 def audit_detail(query_id: str):
     """Full record for one query_log row."""
     with _get_audit_conn() as conn:

@@ -171,6 +171,41 @@ export type AuditRowDetail = {
   token_counts: Record<string, { in: number; out: number }>;
 };
 
+// The /audit endpoints are admin-only (issue #11): the API requires a bearer
+// token. We keep that token in sessionStorage — never in NEXT_PUBLIC_*, which
+// would ship the secret to every visitor — and attach it on each request.
+const AUDIT_TOKEN_KEY = "regrag_audit_token";
+
+export function getAuditToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage.getItem(AUDIT_TOKEN_KEY);
+}
+
+export function setAuditToken(token: string | null): void {
+  if (typeof window === "undefined") return;
+  if (token) window.sessionStorage.setItem(AUDIT_TOKEN_KEY, token);
+  else window.sessionStorage.removeItem(AUDIT_TOKEN_KEY);
+}
+
+/** Raised when the audit API rejects a request for auth reasons (401 or 403). */
+export class AuditAuthError extends Error {
+  status: number;
+  constructor(status: number) {
+    super(
+      status === 403
+        ? "The audit log is disabled on this deployment."
+        : "An audit token is required to view the audit log.",
+    );
+    this.name = "AuditAuthError";
+    this.status = status;
+  }
+}
+
+function auditHeaders(): Record<string, string> {
+  const token = getAuditToken();
+  return token ? { authorization: `Bearer ${token}` } : {};
+}
+
 export async function fetchAuditList(
   opts: { limit?: number; user_id?: string } = {},
 ): Promise<AuditRowSummary[]> {
@@ -178,13 +213,21 @@ export async function fetchAuditList(
   if (opts.limit) params.set("limit", String(opts.limit));
   if (opts.user_id) params.set("user_id", opts.user_id);
   const qs = params.toString() ? `?${params}` : "";
-  const res = await fetch(`${API_BASE}/audit${qs}`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE}/audit${qs}`, {
+    cache: "no-store",
+    headers: auditHeaders(),
+  });
+  if (res.status === 401 || res.status === 403) throw new AuditAuthError(res.status);
   if (!res.ok) throw new Error(`GET /audit ${res.status}`);
   return (await res.json()) as AuditRowSummary[];
 }
 
 export async function fetchAuditDetail(query_id: string): Promise<AuditRowDetail> {
-  const res = await fetch(`${API_BASE}/audit/${query_id}`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE}/audit/${query_id}`, {
+    cache: "no-store",
+    headers: auditHeaders(),
+  });
+  if (res.status === 401 || res.status === 403) throw new AuditAuthError(res.status);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`GET /audit/${query_id} ${res.status}: ${body.slice(0, 200)}`);
