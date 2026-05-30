@@ -53,7 +53,11 @@ export function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
-  const [warm, setWarm] = useState<WarmStatus>({ kind: "warming" });
+  const [warm, setWarm] = useState<WarmStatus>(
+    API_BASE
+      ? { kind: "warming" }
+      : { kind: "failed", reason: "API base URL not configured" },
+  );
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Pre-warm the Railway backend on page mount so the first query doesn't
@@ -61,10 +65,7 @@ export function Chat() {
   // noticeable, surface the hint so the user knows what's happening rather
   // than thinking the demo is broken.
   useEffect(() => {
-    if (!API_BASE) {
-      setWarm({ kind: "failed", reason: "API base URL not configured" });
-      return;
-    }
+    if (!API_BASE) return;
     const t0 = performance.now();
     const controller = new AbortController();
     fetch(`${API_BASE}/health`, { cache: "no-store", signal: controller.signal })
@@ -214,7 +215,7 @@ function WarmingBanner() {
         <div>
           <div className="font-medium">Waking the demo backend…</div>
           <p className="mt-1 leading-relaxed">
-            Railway's free tier sleeps after idle. First request typically takes
+            Railway&apos;s free tier sleeps after idle. First request typically takes
             5–30 seconds while the container starts. Subsequent queries are fast.
           </p>
         </div>
