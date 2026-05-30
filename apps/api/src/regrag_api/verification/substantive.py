@@ -82,6 +82,7 @@ class SubstantiveCheckResult:
     citations_stripped: int            # individual-citation drops within kept sentences
     judge_notes: list[dict]            # per-pair judge output for audit
     should_regenerate: bool            # signal back to the verify node
+    judge_failed: bool = False         # True if the judge call/parse failed → verify refuses (issue #12)
 
 
 def extract_sentences_with_citations(text: str) -> list[SentenceWithCitations]:
@@ -142,11 +143,14 @@ def check_substantive_support(
     scores_by_pair = _invoke_judge(user_msg, n_pairs=len(pairs))
 
     if not scores_by_pair:
-        # Judge failed; fall back to the as-is draft rather than regenerating
-        log.warning("substantive judge returned no scores; finalizing draft as-is")
+        # Judge unavailable or unparseable. A judge that couldn't run is not a
+        # judge that passed: signal judge_failed so the verify node refuses
+        # (issue #12) instead of finalizing an unverified draft.
+        log.warning("substantive judge returned no scores → judge_failed (verify will refuse)")
         return SubstantiveCheckResult(
             cleaned_text=draft, sentences_stripped=0, citations_stripped=0,
             judge_notes=[{"warning": "judge_unavailable"}], should_regenerate=False,
+            judge_failed=True,
         )
 
     # Build per-sentence support map: which chunk_ids were judged supportive
@@ -202,7 +206,10 @@ def check_substantive_support(
         sentences_stripped, len(sentences), strip_rate * 100, citations_stripped,
     )
     return SubstantiveCheckResult(
-        cleaned_text=cleaned or draft,  # if everything got stripped, leave original for regen decision
+        # If everything was stripped, cleaned == "" — do NOT revert to the
+        # unsupported original draft (issue #12). The verify node refuses on
+        # empty/uncited text once the regen budget is exhausted.
+        cleaned_text=cleaned,
         sentences_stripped=sentences_stripped,
         citations_stripped=citations_stripped,
         judge_notes=judge_notes,
