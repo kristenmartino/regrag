@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS documents (
     accession_number TEXT PRIMARY KEY,
     order_number     TEXT,
     docket_numbers   TEXT[],
-    document_type    TEXT NOT NULL,        -- 'final_rule' | 'order' | 'nopr' | 'rehearing_order' | 'anopr' | 'fact_sheet'
+    document_type    TEXT NOT NULL,        -- 'final_rule' | 'order' | 'nopr' | 'rehearing_order' | 'federal_register_publication' | 'anopr' | 'fact_sheet'
     issue_date       DATE NOT NULL,
     title            TEXT NOT NULL,
     source_url       TEXT NOT NULL,
