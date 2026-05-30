@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 
+import { AuditGate } from "@/components/audit-gate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AuditRowDetail, fetchAuditDetail } from "@/lib/api";
+import { AuditAuthError, AuditRowDetail, fetchAuditDetail } from "@/lib/api";
 
 export default function AuditDetailPage({
   params,
@@ -19,12 +20,33 @@ export default function AuditDetailPage({
   const { id } = use(params);
   const [row, setRow] = useState<AuditRowDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [auth, setAuth] = useState<{ needed: boolean; disabled: boolean }>({
+    needed: false,
+    disabled: false,
+  });
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     fetchAuditDetail(id)
-      .then(setRow)
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
-  }, [id]);
+      .then((r) => {
+        if (cancelled) return;
+        setError(null);
+        setAuth({ needed: false, disabled: false });
+        setRow(r);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        if (e instanceof AuditAuthError) {
+          setAuth({ needed: true, disabled: e.status === 403 });
+        } else {
+          setError(e instanceof Error ? e.message : String(e));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, reloadKey]);
 
   return (
     <div className="flex h-[100dvh] flex-col bg-background">
@@ -45,7 +67,12 @@ export default function AuditDetailPage({
 
       <ScrollArea className="flex-1">
         <div className="mx-auto max-w-5xl space-y-4 px-6 py-6">
-          {error ? (
+          {auth.needed ? (
+            <AuditGate
+              disabled={auth.disabled}
+              onUnlock={() => setReloadKey((k) => k + 1)}
+            />
+          ) : error ? (
             <Card className="border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
               <p className="font-medium">Failed to load audit row</p>
               <p className="mt-1 font-mono text-xs">{error}</p>

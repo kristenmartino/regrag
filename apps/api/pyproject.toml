@@ -21,9 +21,15 @@ dependencies = [
 regrag-retrieve = "regrag_api.cli:retrieve"
 regrag-chat = "regrag_api.cli:chat"
 
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27"]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

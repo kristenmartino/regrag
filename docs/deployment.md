@@ -41,6 +41,12 @@ railway variables set DATABASE_URL="$(grep ^DATABASE_URL ~/regrag/.env | cut -d=
 railway variables set VOYAGE_API_KEY="$(grep ^VOYAGE_API_KEY ~/regrag/.env | cut -d= -f2-)"
 railway variables set ANTHROPIC_API_KEY="$(grep ^ANTHROPIC_API_KEY ~/regrag/.env | cut -d= -f2-)"
 
+# Admin token for the /audit endpoints (issue #11). REQUIRED to use the audit log:
+# if unset, /audit and /audit/{id} are disabled (403) for everyone — a safe default,
+# but it means a deploy without this var has no audit UI. The frontend prompts for it
+# and sends it as a bearer token.
+railway variables set REGRAG_AUDIT_TOKEN="$(openssl rand -hex 32)"
+
 # Set CORS origins (comma-separated). Add the Vercel URL after the first frontend deploy.
 railway variables set ALLOWED_ORIGINS="https://regrag.vercel.app"
 ```
