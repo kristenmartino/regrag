@@ -30,7 +30,7 @@ import psycopg
 import voyageai
 from pgvector.psycopg import register_vector
 
-from .identifiers import ExtractedIdentifiers, extract_identifiers
+from .identifiers import ExtractedIdentifiers, build_anchored_roles, extract_identifiers
 
 VECTOR_TOPK = 20
 KEYWORD_TOPK = 10
@@ -338,6 +338,38 @@ def _accessions_for_named_orders(conn: psycopg.Connection, ids: ExtractedIdentif
                         seen.add(acc)
                         out.append(acc)
     return out
+
+
+@lru_cache(maxsize=1)
+def _load_order_role_map() -> dict[str, list[tuple[str, str]]]:
+    """Query Neon for order_number → [(accession_number, document_type)]. Cached for
+    the process lifetime; restart after corpus changes. Like _load_order_to_accessions
+    but carries document_type so callers can split accessions by role (issue #14)."""
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        return {}
+    out: dict[str, list[tuple[str, str]]] = {}
+    try:
+        with psycopg.connect(url, connect_timeout=10) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT order_number, accession_number, document_type "
+                    "FROM documents WHERE order_number IS NOT NULL"
+                )
+                for order_number, accession_number, document_type in cur.fetchall():
+                    out.setdefault(order_number, []).append((accession_number, document_type))
+    except Exception as e:
+        log.warning("order role-map load failed: %s", e)
+        return {}
+    return out
+
+
+def anchored_roles_for(named_orders: list[str]) -> dict[str, dict[str, list[str]]]:
+    """Per-order accessions grouped by role (primary / federal_register / rehearing)
+    for the named orders, from the documents metadata (issue #14)."""
+    if not named_orders:
+        return {}
+    return build_anchored_roles(named_orders, _load_order_role_map())
 
 
 def _vector_topk_within_accessions(

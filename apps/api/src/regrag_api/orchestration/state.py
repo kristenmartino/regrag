@@ -63,6 +63,10 @@ class GraphState(TypedDict, total=False):
     # merely *reference* the named order.
     named_orders: list[str] | None
     anchored_accessions: list[str] | None
+    # Role-split anchored accessions (issue #14): per named order, accessions grouped by
+    # role so the scope verifier and SCOPE prompt don't treat a rehearing order as a
+    # primary-order source. {order: {"primary": [...], "federal_register": [...], "rehearing": [...]}}.
+    anchored_roles: dict[str, dict[str, list[str]]] | None
 
     # Generation
     draft_answer: str | None             # raw model output (last attempt) before verification
@@ -116,6 +120,7 @@ def initial_state(query: str, user_id: str | None = None) -> GraphState:
         top_cosine_sim=None,
         named_orders=None,
         anchored_accessions=None,
+        anchored_roles=None,
         draft_answer=None,
         cited_chunk_ids=None,
         verification_result=None,

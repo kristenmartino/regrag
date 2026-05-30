@@ -131,11 +131,11 @@ def verify(state: GraphState) -> dict:
     # constrain the model fully. Runs BEFORE the substantive judge because
     # this is a cheap rule that can short-circuit a regen.
     named_orders = state.get("named_orders") or []
-    anchored = state.get("anchored_accessions") or []
+    anchored_roles = state.get("anchored_roles") or {}
     scope = check_accession_scope(
         result.cleaned_text,
         named_orders,
-        anchored,
+        anchored_roles,
         regeneration_count=regen_count,
     )
     if scope.sentences_checked > 0:

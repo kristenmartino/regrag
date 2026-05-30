@@ -11,6 +11,7 @@ import logging
 import time
 
 from .._anthropic import SYNTHESIS_MODEL, get_client, parse_json_response
+from ...retrieval.identifiers import primary_citation_accessions
 from ..state import GraphState
 
 log = logging.getLogger(__name__)
@@ -84,7 +85,7 @@ def synthesize(state: GraphState) -> dict:
 
     anchor_note = _anchor_note(
         state.get("named_orders") or [],
-        state.get("anchored_accessions") or [],
+        state.get("anchored_roles") or {},
         chunks_for_prompt,
     )
 
@@ -184,37 +185,43 @@ def _format_chunks_for_prompt(chunks: list[dict]) -> str:
 
 
 def _anchor_note(
-    named_orders: list[str], anchored_accessions: list[str], chunks: list[dict]
+    named_orders: list[str], anchored_roles: dict[str, dict[str, list[str]]], chunks: list[dict]
 ) -> str:
-    """Build a prompt fragment telling the model to prefer same-accession citations
-    when the user named a specific order. Empty string when not applicable.
+    """Build a prompt fragment telling the model which accession(s) count as the PRIMARY
+    citation for each named order's subject (issue #14): a primary order's primary citation
+    is its final-rule / Federal-Register source, NOT its rehearing; a rehearing's is the
+    rehearing. Empty string when nothing applies.
 
-    Only emits the note when:
-      - the query named one or more orders, AND
-      - at least one chunk in the prompt has an accession matching that order.
-    Otherwise the note is misleading (nothing to prefer) or pointless.
+    Only emits when at least one named order has a primary-citation accession that is also
+    present among the retrieved chunks (otherwise the instruction is pointless).
     """
-    if not named_orders or not anchored_accessions:
+    if not named_orders or not anchored_roles:
         return ""
-    accession_set = set(anchored_accessions)
-    matching_chunks = [c for c in chunks if c.get("accession_number") in accession_set]
-    if not matching_chunks:
+    chunk_accessions = {c.get("accession_number") for c in chunks}
+    per_order: list[tuple[str, list[str]]] = []
+    for o in named_orders:
+        accs = [a for a in primary_citation_accessions(o, anchored_roles) if a in chunk_accessions]
+        if accs:
+            per_order.append((o, accs))
+    if not per_order:
         return ""
     orders_str = ", ".join(f"Order {o}" for o in named_orders)
-    acc_str = ", ".join(sorted(accession_set))
+    table = "\n".join(f"  - Order {o}: [{', '.join(accs)}]" for o, accs in per_order)
     return (
         f"\nSCOPE — read this BEFORE the citation discipline section below. This rule is "
         f"applied PER-SENTENCE, not per-answer:\n"
-        f"The user asked specifically about {orders_str}. The canonical document(s) for "
-        f"the named order(s) have accession_number in [{acc_str}].\n"
+        f"The user asked specifically about {orders_str}. Primary-citation accessions by "
+        f"subject — a rehearing order (e.g. Order 841-A) is a SEPARATE document and does NOT "
+        f"count as the primary source for the original order:\n"
+        f"{table}\n"
         f"\nFor each sentence whose SUBJECT is one of the named order(s):\n"
         f"  1. The FIRST citation in that sentence MUST be a chunk_id whose accession_number "
-        f"is in [{acc_str}]. This is non-negotiable. You may add a second citation from a "
-        f"different accession as supporting cross-reference, but the primary citation must "
-        f"be from [{acc_str}].\n"
-        f"  2. If no chunk from [{acc_str}] supports the sentence's primary assertion: "
-        f"DO NOT write that sentence. Either drop it, rewrite it to assert only what an "
-        f"in-scope chunk actually says, or set refused=true.\n"
+        f"is one of the accessions listed for THAT order's subject above. This is non-negotiable. "
+        f"You may add a second citation from a different accession (including a rehearing) as "
+        f"supporting cross-reference, but the primary citation must come from that order's listed set.\n"
+        f"  2. If no listed chunk supports the sentence's primary assertion: DO NOT write that "
+        f"sentence. Either drop it, rewrite it to assert only what a listed chunk says, or set "
+        f"refused=true.\n"
         f"  3. Sprinkling one in-scope citation elsewhere in the answer does NOT exempt other "
         f"sentences from this rule. The rule is per-sentence about the named order's subject.\n"
         f"\nWORKED EXAMPLE — the user asks 'What was the effective date of Order 841?':\n"
@@ -229,12 +236,12 @@ def _anchor_note(
         f"but do not state a specific calendar effective date; the FERC-issued text uses an [INSERT DATE] "
         f"placeholder that the Federal Register later fills in [[20180228-3066:c0259]].' (Scope the answer "
         f"to what 841 chunks actually say.)\n"
-        f"\nReminder: a chunk from a DIFFERENT accession that merely mentions the named order "
-        f"does NOT support a claim about what that order says or requires. Even if the other-accession "
-        f"chunk's text is topically relevant or seems more quotable. If no chunk from [{acc_str}] supports "
-        f"the claim, do not substitute a chunk from another accession — instead, REFUSE or scope narrowly to what the in-scope "
-        f"chunks actually say. Set refused=true and explain that the corpus chunks for the named "
-        f"order don't address the specific question.\n"
+        f"\nReminder: a chunk from a DIFFERENT accession that merely mentions the named order — "
+        f"including the order's own rehearing — does NOT support a claim about what the original order "
+        f"itself says or requires, even if its text is topically relevant or more quotable. If no listed "
+        f"chunk supports the claim, do not substitute another accession — instead, REFUSE or scope narrowly "
+        f"to what the listed chunks actually say. Set refused=true and explain that the corpus chunks for "
+        f"the named order don't address the specific question.\n"
         f"\nYou may still cite chunks from other accessions for claims about OTHER orders or for "
         f"genuine cross-references (e.g. 'Order 2222 builds on Order 841 [[chunk from 2222]]'). The "
         f"rule above applies only to claims whose subject is one of the named order(s) above.\n"
