@@ -27,6 +27,7 @@ from pydantic import BaseModel, Field
 from .audit_auth import audit_auth
 from .orchestration.graph import run as run_graph
 from .orchestration.graph import run_streaming
+from .pii import detect_pii
 from .rate_limit import audit_limit, chat_limit
 
 # Local-dev convenience: load .env from the repo root if present. In production
@@ -95,6 +96,29 @@ class ChatResponse(BaseModel):
     timings_ms: dict[str, int]
 
 
+PII_REFUSAL_MESSAGE = (
+    "This query appears to contain personal information. This public demo declines "
+    "to process or store it. Please rephrase without personal data."
+)
+
+
+def _pii_refusal_payload() -> dict:
+    """Refusal payload shared by /chat (ChatResponse) and /chat/stream (done event).
+    Contains no query text (issue #9: don't process or store PII)."""
+    return {
+        "classification": None,
+        "classification_confidence": None,
+        "sub_queries": None,
+        "retrieved_chunks": [],
+        "final_answer": PII_REFUSAL_MESSAGE,
+        "refusal_emitted": True,
+        "refusal_reason": "pii_blocked",
+        "citations_stripped": 0,
+        "regeneration_count": 0,
+        "timings_ms": {},
+    }
+
+
 @app.api_route("/health", methods=["GET", "HEAD"])
 def health() -> dict[str, str]:
     """Health check. Supports both GET (returns body) and HEAD (returns 200
@@ -104,7 +128,13 @@ def health() -> dict[str, str]:
 
 @app.post("/chat", response_model=ChatResponse, dependencies=[Depends(chat_limit)])
 def chat(req: ChatRequest) -> ChatResponse:
-    log.info("/chat query=%r user_id=%r", req.query, req.user_id)
+    # PII gate (issue #9): block BEFORE any raw-query logging, the graph, or the
+    # audit write — a query with structured PII never reaches Anthropic or Neon.
+    pii_kinds = detect_pii(req.query)
+    if pii_kinds:
+        log.info("pii_blocked path=/chat user_id=%r kinds=%s", req.user_id, pii_kinds)
+        return ChatResponse(**_pii_refusal_payload())
+    log.info("/chat request user_id=%r query_len=%d", req.user_id, len(req.query))
     try:
         state = run_graph(req.query, user_id=req.user_id)
     except Exception as e:
@@ -277,7 +307,21 @@ def chat_stream(req: ChatRequest):
       - {type: "done", state: dict}    # final state for client rendering
       - {type: "error", message: str}  # on exception
     """
-    log.info("/chat/stream query=%r user_id=%r", req.query, req.user_id)
+    # PII gate (issue #9): block BEFORE any raw-query logging or the graph.
+    pii_kinds = detect_pii(req.query)
+    if pii_kinds:
+        log.info("pii_blocked path=/chat/stream user_id=%r kinds=%s", req.user_id, pii_kinds)
+
+        def blocked_iter():
+            yield f"data: {json.dumps({'type': 'started', 'query': ''})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'state': _pii_refusal_payload()})}\n\n"
+
+        return StreamingResponse(
+            blocked_iter(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
+        )
+    log.info("/chat/stream request user_id=%r query_len=%d", req.user_id, len(req.query))
 
     def event_iter():
         try:
