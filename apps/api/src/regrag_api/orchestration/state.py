@@ -16,6 +16,7 @@ Field semantics (per docs/implementation-plan.md §2.4):
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass
 from typing import Any, Literal, TypedDict
 
@@ -44,6 +45,7 @@ class GraphState(TypedDict, total=False):
     # Input
     query: str
     user_id: str | None
+    query_id: str   # stable id minted at the handler/graph entry (issue #7); links logs ↔ audit row
     # Identifiers extracted from the ORIGINAL query at state construction (issue #13):
     # deterministic, model-free metadata preserved so decomposition can't drop a
     # user-named order/docket/citation before retrieval/anchoring sees it. Serialized
@@ -106,13 +108,14 @@ class GraphState(TypedDict, total=False):
     token_counts: dict[str, dict[str, int]]  # {"classify": {"in": 14, "out": 4}, ...}
 
 
-def initial_state(query: str, user_id: str | None = None) -> GraphState:
+def initial_state(query: str, user_id: str | None = None, query_id: str | None = None) -> GraphState:
     # Local import keeps the state module free of a retrieval-package import at load time.
     from ..retrieval.identifiers import extract_identifiers
 
     return GraphState(
         query=query,
         user_id=user_id,
+        query_id=query_id or str(uuid.uuid4()),
         original_identifiers=extract_identifiers(query).as_dict(),
         classification=None,
         classification_confidence=None,
