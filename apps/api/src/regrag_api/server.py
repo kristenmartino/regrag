@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from .audit_auth import audit_auth
+from .logging_config import configure_logging
 from .orchestration.graph import run as run_graph
 from .orchestration.graph import run_streaming
 from .pii import detect_pii
@@ -40,7 +42,7 @@ try:
 except (IndexError, OSError):
     pass
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)-7s %(name)s: %(message)s")
+configure_logging()  # issue #7: JSON logs by default (REGRAG_LOG_FORMAT=text for local dev)
 log = logging.getLogger(__name__)
 
 
@@ -84,6 +86,7 @@ class ChunkSummary(BaseModel):
 
 
 class ChatResponse(BaseModel):
+    query_id: str | None
     classification: str | None
     classification_confidence: float | None
     sub_queries: list[str] | None
@@ -102,10 +105,12 @@ PII_REFUSAL_MESSAGE = (
 )
 
 
-def _pii_refusal_payload() -> dict:
+def _pii_refusal_payload(query_id: str) -> dict:
     """Refusal payload shared by /chat (ChatResponse) and /chat/stream (done event).
-    Contains no query text (issue #9: don't process or store PII)."""
+    Contains no query text (issue #9: don't process or store PII). query_id (issue #7)
+    is returned to the client even on a block, though no audit row is written."""
     return {
+        "query_id": query_id,
         "classification": None,
         "classification_confidence": None,
         "sub_queries": None,
@@ -128,17 +133,24 @@ def health() -> dict[str, str]:
 
 @app.post("/chat", response_model=ChatResponse, dependencies=[Depends(chat_limit)])
 def chat(req: ChatRequest) -> ChatResponse:
+    # query_id (issue #7): minted here, BEFORE the PII check, so even a blocked
+    # request gets a stable id in its log + response; threaded into the graph so
+    # the logs, the audit row, and the client response all share one id.
+    query_id = str(uuid.uuid4())
     # PII gate (issue #9): block BEFORE any raw-query logging, the graph, or the
     # audit write — a query with structured PII never reaches Anthropic or Neon.
     pii_kinds = detect_pii(req.query)
     if pii_kinds:
-        log.info("pii_blocked path=/chat user_id=%r kinds=%s", req.user_id, pii_kinds)
-        return ChatResponse(**_pii_refusal_payload())
-    log.info("/chat request user_id=%r query_len=%d", req.user_id, len(req.query))
+        log.info("pii_blocked", extra={"query_id": query_id, "path": "/chat",
+                                       "user_id": req.user_id, "query_len": len(req.query),
+                                       "pii_kinds": pii_kinds})
+        return ChatResponse(**_pii_refusal_payload(query_id))
+    log.info("chat_request", extra={"query_id": query_id, "path": "/chat",
+                                    "user_id": req.user_id, "query_len": len(req.query)})
     try:
-        state = run_graph(req.query, user_id=req.user_id)
+        state = run_graph(req.query, user_id=req.user_id, query_id=query_id)
     except Exception as e:
-        log.exception("chat invocation failed")
+        log.exception("chat invocation failed", extra={"query_id": query_id})
         raise HTTPException(status_code=500, detail=f"chat failed: {type(e).__name__}: {e}") from e
 
     chunks_raw = state.get("retrieved_chunks") or []
@@ -156,6 +168,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     ]
 
     return ChatResponse(
+        query_id=state.get("query_id"),
         classification=state.get("classification"),
         classification_confidence=state.get("classification_confidence"),
         sub_queries=state.get("sub_queries"),
@@ -307,28 +320,34 @@ def chat_stream(req: ChatRequest):
       - {type: "done", state: dict}    # final state for client rendering
       - {type: "error", message: str}  # on exception
     """
+    # query_id (issue #7): minted before the PII check; shared by logs, the graph,
+    # the audit row, and the client's done.state.
+    query_id = str(uuid.uuid4())
     # PII gate (issue #9): block BEFORE any raw-query logging or the graph.
     pii_kinds = detect_pii(req.query)
     if pii_kinds:
-        log.info("pii_blocked path=/chat/stream user_id=%r kinds=%s", req.user_id, pii_kinds)
+        log.info("pii_blocked", extra={"query_id": query_id, "path": "/chat/stream",
+                                       "user_id": req.user_id, "query_len": len(req.query),
+                                       "pii_kinds": pii_kinds})
 
         def blocked_iter():
             yield f"data: {json.dumps({'type': 'started', 'query': ''})}\n\n"
-            yield f"data: {json.dumps({'type': 'done', 'state': _pii_refusal_payload()})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'state': _pii_refusal_payload(query_id)})}\n\n"
 
         return StreamingResponse(
             blocked_iter(),
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
         )
-    log.info("/chat/stream request user_id=%r query_len=%d", req.user_id, len(req.query))
+    log.info("chat_request", extra={"query_id": query_id, "path": "/chat/stream",
+                                    "user_id": req.user_id, "query_len": len(req.query)})
 
     def event_iter():
         try:
-            for event in run_streaming(req.query, user_id=req.user_id):
+            for event in run_streaming(req.query, user_id=req.user_id, query_id=query_id):
                 yield f"data: {json.dumps(event, default=str)}\n\n"
         except Exception as e:
-            log.exception("streaming chat invocation failed")
+            log.exception("streaming chat invocation failed", extra={"query_id": query_id})
             yield f"data: {json.dumps({'type': 'error', 'message': f'{type(e).__name__}: {e}'})}\n\n"
 
     return StreamingResponse(

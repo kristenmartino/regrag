@@ -43,7 +43,8 @@ def write_query_log(state: GraphState, *, conn: psycopg.Connection | None = None
                 log.debug("audit skipped: DATABASE_URL not set")
                 return None
             conn = psycopg.connect(url)
-        query_id = uuid.uuid4()
+        sid = state.get("query_id")
+        query_id = uuid.UUID(sid) if sid else uuid.uuid4()  # use the handler/graph id (issue #7); mint only as fallback
         row = _build_row(state, query_id)
         with conn.cursor() as cur:
             cur.execute(
