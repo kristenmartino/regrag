@@ -27,6 +27,7 @@ RefusalReason = Literal[
     "llm_unavailable",         # upstream LLM call failed (outage, rate limit, network)
     "verification_unrecoverable",  # unsupported/uncited content after the regen budget is exhausted
     "verification_unavailable",    # substantive judge outage / parse failure — verifier could not complete
+    "pii_blocked",                 # query contained structured PII; refused at the handler before processing/logging/storage (#9)
 ]
 
 
