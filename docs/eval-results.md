@@ -1,8 +1,11 @@
 # RegRAG Evaluation Results
 
-Latest production run: **2026-05-29** (v6) against the **40-question** eval set, now over a **17-document** corpus. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge). v6 adds the citation-attribution hardening from the post-review pass: document-anchored retrieval (per-accession quota + per-accession RRF), the per-sentence accession-scope verifier, and two new Order 841 sources (the rehearing Order 841-A and the Federal Register publication carrying the literal effective date).
+**Latest run: 2026-05-30 — v7 post-hardening checkpoint (issue #21)**, re-measured after the #11–#16 hardening (fail-closed verifier, original-identifier preservation, role-aware anchoring); see the **Post-hardening re-run (v7)** section below — citation faithfulness + retrieval recall both improved, one new over-refusal (`counsel-003`).
+
+Prior baseline: **2026-05-29** (v6) against the **40-question** eval set, now over a **17-document** corpus. System under test: voyage-3.5-lite (512-dim) embeddings + claude-haiku-4-5 (classifier + inline citation judge) + claude-sonnet-4-6 (decomposer + synthesizer + offline judge). v6 adds the citation-attribution hardening from the post-review pass: document-anchored retrieval (per-accession quota + per-accession RRF), the per-sentence accession-scope verifier, and two new Order 841 sources (the rehearing Order 841-A and the Federal Register publication carrying the literal effective date).
 
 Raw reports:
+- [eval-20260530-191350.json](../packages/eval/results/eval-20260530-191350.json) — **v7** (55 questions, post #11–#16 hardening; run as 4 per-persona batches and combined)
 - [eval-20260529-144731.json](../packages/eval/results/eval-20260529-144731.json) — **v6** (40 questions, 17-doc corpus, doc-anchored retrieval + scope verifier)
 - [eval-20260509-041345.json](../packages/eval/results/eval-20260509-041345.json) — **v5** (40 questions, post corpus expansion to 15 docs)
 - [eval-20260508-184200.json](../packages/eval/results/eval-20260508-184200.json) — **v2/v3** (28 questions, 8-doc corpus, inline judge)
@@ -10,6 +13,28 @@ Raw reports:
 - [eval-20260508-221716.json](../packages/eval/results/eval-20260508-221716.json) — **thin baseline** (vanilla RAG, minimal prompt)
 - [eval-20260508-230246.json](../packages/eval/results/eval-20260508-230246.json) — **matched baseline** (RegRAG prompt, no agentic, no verification)
 - [eval-20260507-044907.json](../packages/eval/results/eval-20260507-044907.json) — **v1 baseline** (chunk-id verifier only)
+
+---
+
+## Post-hardening re-run (v7, 2026-05-30, issue #21)
+
+A checkpoint after the #11–#16 hardening landed — specifically the changes that alter answer/retrieval behavior: **#12** (fail-closed verifier: no-citation / judge-failure / all-stripped drafts now refuse instead of finalizing unsupported text), **#13** (original-query identifiers preserved across decomposition), and **#14** (role-aware anchoring: a rehearing order can no longer satisfy a primary-order claim). Run on `main` post-merge as 4 per-persona batches (dev-env background runs kept getting killed) and combined — identical questions and code to a single 55-question run.
+
+The 32 answer-expected questions are identical across runs, so **retrieval recall and citation faithfulness are directly comparable**. Refusal is shown both on v6's exact 40-question subset (apples-to-apples) and on the full 55-question set (the durable measurement, with the expanded 23-question OOS set):
+
+| Metric | v6 (40-q) | v7 on v6's 40-q | v7 full 55-q | Read |
+|---|---|---|---|---|
+| **Citation faithfulness** | 94.8% | **97.2%** | **97.2%** | **+2.4pp** — the hardening's goal; more faithful answers |
+| **Retrieval recall** | 95.8% | **97.9%** | **97.9%** | **+2.1pp** — #13/#14 didn't hurt recall; slightly helped |
+| Refusal accuracy | 92.5% | 87.5% | 87.3% | down ~5pp — see the over-refusal note below |
+| Refusal precision | 77.8% | 66.7% | **86.4%** | the 8-OOS subset is too small to read; 86.4% on the 23-OOS set is the durable figure |
+| Refusal recall | 87.5% | 75.0% | 82.6% | likewise — the 55-q number is the stable one |
+
+**Honest read.** The hardening did what it was designed to: **citation faithfulness +2.4pp and retrieval recall +2.1pp** on the identical answer set. The cost is **exactly one new over-refusal — `counsel-003`** — which answered correctly in v6 (CF 1.0, recall 1.0) and now declines. The other two answer-questions that refuse in v7 (`counsel-005`, `fedstaff-006`) **already refused in v6** — pre-existing, and arguably-correct refusals (the corpus doesn't fully ground them). So the #12 fail-closed verifier + #14 role-aware scope traded one borderline in-scope answer for higher faithfulness — the intended regulated-domain posture (decline rather than under-support).
+
+On refusal precision/recall, v6's 40-q numbers rest on only **8** OOS questions and are too small to read drift into; the durable measurement is the **55-q** set (23 OOS): **86.4% precision / 82.6% recall** (19/22 refusals correct; 19/23 OOS caught). 0 of 55 questions errored.
+
+**Follow-up:** `counsel-003` is worth a look — confirm whether its v7 refusal is defensible (a genuinely under-supported claim) or an over-strict scope/verifier trip to loosen. Not blocking; the net trade favors faithfulness.
 
 ---
 
