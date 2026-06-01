@@ -116,8 +116,9 @@ def run_streaming(query: str, *, user_id: str | None = None, audit: bool = True,
 
     Event shapes:
       {"type": "started", "query": str}
-      {"type": "stage_complete", "stage": str, "delta": dict, "elapsed_ms": int}
+      {"type": "stage_complete", "stage": str, "delta_summary": dict, "elapsed_ms": int}
       {"type": "done", "state": dict}    # full final state, serialized
+    No "stage_complete" is emitted for a no-op node (empty/None delta).
     """
     import time
 
@@ -128,8 +129,16 @@ def run_streaming(query: str, *, user_id: str | None = None, audit: bool = True,
 
     last_timings = dict(state.get("timings") or {})
     for chunk in graph.stream(state, stream_mode="updates"):
-        # chunk is {node_name: state_delta}
+        # chunk is {node_name: state_delta}. In stream_mode="updates", langgraph
+        # surfaces a node that returns {} or None as a *None* delta — e.g. the
+        # answerability gate, which is in every query's path and returns {} when its
+        # flag is off (the default). Such no-op nodes have nothing to merge or report,
+        # so skip them; otherwise `delta.items()` raises AttributeError on None.
+        # graph.invoke() (the non-streaming /chat path) tolerates the same returns
+        # silently, which is why only /chat/stream crashed.
         for node_name, delta in chunk.items():
+            if not delta:
+                continue
             # Merge delta into our running state copy
             for k, v in delta.items():
                 state[k] = v
