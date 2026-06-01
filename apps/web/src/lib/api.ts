@@ -128,6 +128,26 @@ export const STAGE_LABEL: Record<StageName, string> = {
   verify: "Checking citations",
 };
 
+// Superset used at render time: the ordered-pipeline labels plus conditional
+// stages that aren't in StageName because they don't run by default. The
+// answerability gate only streams a stage when REGRAG_ANSWERABILITY_GATE is on
+// (see apps/api/.../nodes/answerability.py).
+const STAGE_LABELS: Record<string, string> = {
+  ...STAGE_LABEL,
+  answerability_gate: "Checking answerability",
+};
+
+/**
+ * Human label for a pipeline stage. Tolerant of stage names outside StageName
+ * (e.g. a flag-gated backend stage): falls back to a humanized form of the raw
+ * name so the UI never renders `undefined`.
+ */
+export function stageLabel(stage: string): string {
+  return stage in STAGE_LABELS
+    ? STAGE_LABELS[stage]
+    : stage.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+}
+
 // ─── /audit endpoints ──────────────────────────────────────────────
 
 export type AuditRowSummary = {
