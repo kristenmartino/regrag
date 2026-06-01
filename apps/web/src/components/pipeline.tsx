@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { STAGE_LABEL, StageName, StreamEvent } from "@/lib/api";
+import { stageLabel, StageName, StreamEvent } from "@/lib/api";
 
 export type PipelineStage = {
   name: StageName;
@@ -101,7 +101,7 @@ export function PipelineView({
             <StatusDot status={s.status} />
             <div className="flex-1">
               <div className="flex items-baseline gap-2">
-                <span className="font-medium">{STAGE_LABEL[s.name]}</span>
+                <span className="font-medium">{stageLabel(s.name)}</span>
                 {s.elapsed_ms != null && (
                   <span className="font-mono text-[10px] text-muted-foreground">
                     {(s.elapsed_ms / 1000).toFixed(1)}s
